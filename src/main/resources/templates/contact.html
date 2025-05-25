@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liên hệ - Travel Web</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-globe-americas"></i> Travel Web
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home"></i> Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tours">
+                            <i class="fas fa-map-marked-alt"></i> Tours
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-list"></i> Danh mục
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/tours/featured">Tours nổi bật</a></li>
+                            <li><a class="dropdown-item" href="/tours/discount">Tours giảm giá</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/tours">Tất cả tours</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">
+                            <i class="fas fa-info-circle"></i> Về chúng tôi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/contact">
+                            <i class="fas fa-phone"></i> Liên hệ
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <form class="d-flex me-3" action="/tours/search" method="get">
+                        <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm kiếm tour..." style="width: 200px;">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                    <a href="/login" class="btn btn-outline-light me-2">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </a>
+                    <a href="/register" class="btn btn-light">
+                        <i class="fas fa-user-plus"></i> Đăng ký
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold">Liên hệ với chúng tôi</h1>
+                    <p class="lead">Chúng tôi luôn sẵn sàng hỗ trợ và tư vấn cho bạn</p>
+                </div>
+                <div class="col-lg-6">
+                    <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop" 
+                         class="img-fluid rounded" alt="Contact Us">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Info -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2>Thông tin liên hệ</h2>
+                    <p class="lead">Liên hệ với chúng tôi qua các kênh sau</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
+                            <h5>Địa chỉ</h5>
+                            <p class="text-muted">123 Đường ABC, Quận 1<br>Thành phố Hồ Chí Minh, Việt Nam</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-phone fa-3x text-primary mb-3"></i>
+                            <h5>Hotline</h5>
+                            <p class="text-muted">
+                                <strong>(028) 1234 5678</strong><br>
+                                <small>Hỗ trợ 24/7</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                            <h5>Email</h5>
+                            <p class="text-muted">
+                                <strong>info@travelweb.com</strong><br>
+                                <small>Phản hồi trong 24h</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow">
+                        <div class="card-header bg-primary text-white text-center py-4">
+                            <h3 class="mb-0">Gửi tin nhắn cho chúng tôi</h3>
+                            <p class="mb-0">Chúng tôi sẽ phản hồi trong vòng 24 giờ</p>
+                        </div>
+                        <div class="card-body p-5">
+                            <form id="contactForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fullName" class="form-label">Họ và tên *</label>
+                                        <input type="text" class="form-control" id="fullName" name="fullName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email *</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Số điện thoại</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="subject" class="form-label">Chủ đề *</label>
+                                        <select class="form-select" id="subject" name="subject" required>
+                                            <option value="">Chọn chủ đề</option>
+                                            <option value="tour-inquiry">Tư vấn tour</option>
+                                            <option value="booking">Đặt tour</option>
+                                            <option value="complaint">Khiếu nại</option>
+                                            <option value="feedback">Góp ý</option>
+                                            <option value="other">Khác</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="tourInterest" class="form-label">Tour quan tâm</label>
+                                    <input type="text" class="form-control" id="tourInterest" name="tourInterest" 
+                                           placeholder="Nhập tên tour hoặc điểm đến bạn quan tâm">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Nội dung tin nhắn *</label>
+                                    <textarea class="form-control" id="message" name="message" rows="5" 
+                                              placeholder="Nhập nội dung tin nhắn của bạn..." required></textarea>
+                                </div>
+
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                                    <label class="form-check-label" for="agreeTerms">
+                                        Tôi đồng ý với <a href="#" class="text-primary">điều khoản sử dụng</a> và <a href="#" class="text-primary">chính sách bảo mật</a> *
+                                    </label>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-paper-plane"></i> Gửi tin nhắn
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Office Hours -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2>Giờ làm việc</h2>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="row text-center">
+                                <div class="col-md-6 mb-3">
+                                    <h5><i class="fas fa-clock text-primary"></i> Văn phòng</h5>
+                                    <p class="mb-1"><strong>Thứ 2 - Thứ 6:</strong> 8:00 - 18:00</p>
+                                    <p class="mb-1"><strong>Thứ 7:</strong> 8:00 - 17:00</p>
+                                    <p class="mb-0"><strong>Chủ nhật:</strong> 9:00 - 16:00</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <h5><i class="fas fa-headset text-primary"></i> Hotline</h5>
+                                    <p class="mb-1"><strong>24/7</strong></p>
+                                    <p class="mb-0">Hỗ trợ khẩn cấp và tư vấn</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2>Câu hỏi thường gặp</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq1">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                    Làm thế nào để đặt tour?
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Bạn có thể đặt tour trực tiếp trên website, gọi hotline (028) 1234 5678, hoặc đến trực tiếp văn phòng của chúng tôi. Đội ngũ tư vấn sẽ hỗ trợ bạn chọn tour phù hợp và hoàn thành thủ tục đặt tour.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                    Tôi có thể hủy tour đã đặt không?
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Có, bạn có thể hủy tour theo chính sách hủy tour của chúng tôi. Phí hủy tour sẽ tùy thuộc vào thời gian hủy trước ngày khởi hành. Vui lòng liên hệ với chúng tôi để biết thêm chi tiết.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                    Tour có bao gồm bảo hiểm không?
+                                </button>
+                            </h2>
+                            <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Tất cả tour của chúng tôi đều bao gồm bảo hiểm du lịch cơ bản. Bạn cũng có thể mua thêm bảo hiểm du lịch mở rộng để có sự bảo vệ toàn diện hơn.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq4">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                                    Tôi cần chuẩn bị gì cho chuyến đi?
+                                </button>
+                            </h2>
+                            <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Danh sách đồ cần thiết sẽ được gửi cho bạn sau khi đặt tour. Thông thường bao gồm: giấy tờ tùy thân, quần áo phù hợp, thuốc cá nhân, và các vật dụng cần thiết khác tùy theo loại tour.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-4">
+                    <h2>Vị trí văn phòng</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow">
+                        <div class="card-body p-0">
+                            <!-- Placeholder for Google Maps -->
+                            <div style="height: 400px; background: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                                <div class="text-center">
+                                    <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Bản đồ sẽ được tích hợp Google Maps</h5>
+                                    <p class="text-muted">123 Đường ABC, Quận 1, TP.HCM</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-0">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="fas fa-globe-americas"></i> Travel Web</h5>
+                    <p>Đồng hành cùng bạn khám phá thế giới với những chuyến đi an toàn, chất lượng và đáng nhớ.</p>
+                    <div>
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-youtube fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <h6>Dịch vụ</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/tours" class="text-white-50">Tours trong nước</a></li>
+                        <li><a href="/tours" class="text-white-50">Tours nước ngoài</a></li>
+                        <li><a href="/tours/featured" class="text-white-50">Tours nổi bật</a></li>
+                        <li><a href="/tours/discount" class="text-white-50">Tours giảm giá</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h6>Thông tin</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/about" class="text-white-50">Về chúng tôi</a></li>
+                        <li><a href="/contact" class="text-white-50">Liên hệ</a></li>
+                        <li><a href="#" class="text-white-50">Điều khoản sử dụng</a></li>
+                        <li><a href="#" class="text-white-50">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h6>Liên hệ</h6>
+                    <ul class="list-unstyled">
+                        <li class="text-white-50"><i class="fas fa-map-marker-alt"></i> 123 Đường ABC, Quận 1, TP.HCM</li>
+                        <li class="text-white-50"><i class="fas fa-phone"></i> (028) 1234 5678</li>
+                        <li class="text-white-50"><i class="fas fa-envelope"></i> info@travelweb.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Travel Web. All rights reserved. Designed with <i class="fas fa-heart text-danger"></i></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simulate form submission
+            const button = e.target.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+                button.innerHTML = originalText;
+                button.disabled = false;
+                e.target.reset();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

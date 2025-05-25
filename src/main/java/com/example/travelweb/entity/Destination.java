@@ -150,4 +150,27 @@ public class Destination {
     public void setTours(List<Tour> tours) {
         this.tours = tours;
     }
+    
+    // Utility methods
+    public void addTour(Tour tour) {
+        tours.add(tour);
+        tour.setDestination(this);
+    }
+    
+    public void removeTour(Tour tour) {
+        tours.remove(tour);
+        tour.setDestination(null);
+    }
+    
+    @Override
+    public String toString() {
+        return "Destination{" +
+                "destinationId=" + destinationId +
+                ", destinationName='" + destinationName + '\'' +
+                ", country='" + country + '\'' +
+                ", city='" + city + '\'' +
+                ", status=" + status +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

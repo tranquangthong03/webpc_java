@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Về chúng tôi - Travel Web</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-globe-americas"></i> Travel Web
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home"></i> Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tours">
+                            <i class="fas fa-map-marked-alt"></i> Tours
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-list"></i> Danh mục
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/tours/featured">Tours nổi bật</a></li>
+                            <li><a class="dropdown-item" href="/tours/discount">Tours giảm giá</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/tours">Tất cả tours</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/about">
+                            <i class="fas fa-info-circle"></i> Về chúng tôi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">
+                            <i class="fas fa-phone"></i> Liên hệ
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <form class="d-flex me-3" action="/tours/search" method="get">
+                        <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm kiếm tour..." style="width: 200px;">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                    <a href="/login" class="btn btn-outline-light me-2">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </a>
+                    <a href="/register" class="btn btn-light">
+                        <i class="fas fa-user-plus"></i> Đăng ký
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold">Về Travel Web</h1>
+                    <p class="lead">Chúng tôi là đối tác đáng tin cậy cho mọi chuyến phiêu lưu của bạn</p>
+                </div>
+                <div class="col-lg-6">
+                    <img src="https://images.unsplash.com/photo-1552581234-26160f608093?w=600&h=400&fit=crop" 
+                         class="img-fluid rounded" alt="About Us">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Content -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="text-center mb-5">Câu chuyện của chúng tôi</h2>
+                    <p class="lead text-center mb-4">
+                        Travel Web được thành lập với sứ mệnh mang đến những trải nghiệm du lịch tuyệt vời và đáng nhớ cho mọi khách hàng.
+                    </p>
+                    <p>
+                        Với hơn 10 năm kinh nghiệm trong ngành du lịch, chúng tôi hiểu rằng mỗi chuyến đi không chỉ là một cuộc phiêu lưu mà còn là cơ hội để tạo ra những kỷ niệm đẹp, khám phá văn hóa mới và mở rộng tầm nhìn về thế giới.
+                    </p>
+                    <p>
+                        Đội ngũ của chúng tôi bao gồm những chuyên gia du lịch giàu kinh nghiệm, hướng dẫn viên địa phương am hiểu và đội ngũ chăm sóc khách hàng tận tâm. Chúng tôi cam kết mang đến cho bạn những tour du lịch chất lượng cao với mức giá hợp lý nhất.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Mission -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2>Sứ mệnh & Tầm nhìn</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-bullseye fa-3x text-primary mb-3"></i>
+                            <h4>Sứ mệnh</h4>
+                            <p>Mang đến những trải nghiệm du lịch an toàn, chất lượng và đáng nhớ cho mọi khách hàng. Chúng tôi cam kết tạo ra những chuyến đi hoàn hảo với dịch vụ tận tâm và chuyên nghiệp.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-eye fa-3x text-primary mb-3"></i>
+                            <h4>Tầm nhìn</h4>
+                            <p>Trở thành công ty du lịch hàng đầu Việt Nam, được khách hàng tin tưởng và lựa chọn. Chúng tôi hướng tới việc kết nối mọi người với những điểm đến tuyệt vời trên khắp thế giới.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Values -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2>Giá trị cốt lõi</h2>
+                    <p class="lead">Những giá trị định hướng mọi hoạt động của chúng tôi</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-shield-alt fa-2x text-white"></i>
+                        </div>
+                        <h5>An toàn</h5>
+                        <p>An toàn của khách hàng luôn được đặt lên hàng đầu trong mọi tour du lịch của chúng tôi.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-heart fa-2x text-white"></i>
+                        </div>
+                        <h5>Tận tâm</h5>
+                        <p>Chúng tôi phục vụ khách hàng bằng cả trái tim, luôn lắng nghe và đáp ứng mọi nhu cầu.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-star fa-2x text-white"></i>
+                        </div>
+                        <h5>Chất lượng</h5>
+                        <p>Cam kết mang đến những tour du lịch chất lượng cao với trải nghiệm tuyệt vời nhất.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2>Đội ngũ của chúng tôi</h2>
+                    <p class="lead">Những con người tài năng và tận tâm</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face" 
+                                 class="rounded-circle mb-3" alt="CEO" style="width: 100px; height: 100px; object-fit: cover;">
+                            <h5>Nguyễn Văn An</h5>
+                            <p class="text-muted">Giám đốc điều hành</p>
+                            <p class="small">Với hơn 15 năm kinh nghiệm trong ngành du lịch, anh An đã dẫn dắt Travel Web trở thành một trong những công ty du lịch uy tín nhất.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b8c9?w=150&h=150&fit=crop&crop=face" 
+                                 class="rounded-circle mb-3" alt="Manager" style="width: 100px; height: 100px; object-fit: cover;">
+                            <h5>Trần Thị Bình</h5>
+                            <p class="text-muted">Trưởng phòng Tour</p>
+                            <p class="small">Chị Bình có kinh nghiệm sâu rộng trong việc thiết kế và tổ chức các tour du lịch chất lượng cao trong và ngoài nước.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" 
+                                 class="rounded-circle mb-3" alt="Support" style="width: 100px; height: 100px; object-fit: cover;">
+                            <h5>Lê Minh Cường</h5>
+                            <p class="text-muted">Trưởng phòng CSKH</p>
+                            <p class="small">Anh Cường và đội ngũ chăm sóc khách hàng luôn sẵn sàng hỗ trợ 24/7 để đảm bảo chuyến đi của bạn diễn ra suôn sẻ.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 mb-4">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                            <h3 class="fw-bold">10,000+</h3>
+                            <p class="text-muted">Khách hàng hài lòng</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <i class="fas fa-map-marked-alt fa-3x text-primary mb-3"></i>
+                            <h3 class="fw-bold">500+</h3>
+                            <p class="text-muted">Tour đã tổ chức</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <i class="fas fa-globe-asia fa-3x text-primary mb-3"></i>
+                            <h3 class="fw-bold">50+</h3>
+                            <p class="text-muted">Điểm đến</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
+                            <h3 class="fw-bold">10+</h3>
+                            <p class="text-muted">Năm kinh nghiệm</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2>Tại sao chọn Travel Web?</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>Dịch vụ chuyên nghiệp</h5>
+                            <p>Đội ngũ nhân viên được đào tạo bài bản, chuyên nghiệp và có kinh nghiệm lâu năm trong ngành du lịch.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>Giá cả cạnh tranh</h5>
+                            <p>Chúng tôi cam kết cung cấp các tour du lịch chất lượng cao với mức giá tốt nhất trên thị trường.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>Hỗ trợ 24/7</h5>
+                            <p>Đội ngũ chăm sóc khách hàng luôn sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi trong suốt chuyến đi.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>An toàn đảm bảo</h5>
+                            <p>Tất cả tour của chúng tôi đều được bảo hiểm và tuân thủ nghiêm ngặt các quy định về an toàn.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2>Sẵn sàng khám phá thế giới cùng chúng tôi?</h2>
+                    <p class="lead mb-4">Hãy để Travel Web đồng hành cùng bạn trong những chuyến phiêu lưu tuyệt vời!</p>
+                    <a href="/tours" class="btn btn-light btn-lg me-3">Xem Tours</a>
+                    <a href="/contact" class="btn btn-outline-light btn-lg">Liên hệ ngay</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-0">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="fas fa-globe-americas"></i> Travel Web</h5>
+                    <p>Đồng hành cùng bạn khám phá thế giới với những chuyến đi an toàn, chất lượng và đáng nhớ.</p>
+                    <div>
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-youtube fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <h6>Dịch vụ</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/tours" class="text-white-50">Tours trong nước</a></li>
+                        <li><a href="/tours" class="text-white-50">Tours nước ngoài</a></li>
+                        <li><a href="/tours/featured" class="text-white-50">Tours nổi bật</a></li>
+                        <li><a href="/tours/discount" class="text-white-50">Tours giảm giá</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h6>Thông tin</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/about" class="text-white-50">Về chúng tôi</a></li>
+                        <li><a href="/contact" class="text-white-50">Liên hệ</a></li>
+                        <li><a href="#" class="text-white-50">Điều khoản sử dụng</a></li>
+                        <li><a href="#" class="text-white-50">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h6>Liên hệ</h6>
+                    <ul class="list-unstyled">
+                        <li class="text-white-50"><i class="fas fa-map-marker-alt"></i> 123 Đường ABC, Quận 1, TP.HCM</li>
+                        <li class="text-white-50"><i class="fas fa-phone"></i> (028) 1234 5678</li>
+                        <li class="text-white-50"><i class="fas fa-envelope"></i> info@travelweb.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Travel Web. All rights reserved. Designed with <i class="fas fa-heart text-danger"></i></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

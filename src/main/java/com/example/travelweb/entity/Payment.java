@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,55 +18,63 @@ public class Payment {
     @Column(name = "payment_id")
     private Long paymentId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     @NotNull
     private Booking booking;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false, length = 50)
-    private PaymentMethod paymentMethod;
     
     @Column(name = "amount", nullable = false, precision = 18, scale = 2)
     @DecimalMin(value = "0.0", inclusive = false)
     private BigDecimal amount;
     
-    @Column(name = "transaction_id", length = 100)
-    private String transactionId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false, length = 20)
+    private PaymentMethod paymentMethod;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false, length = 20)
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
     
-    @Column(name = "payment_description", length = 500)
-    private String paymentDescription;
-    
-    @CreationTimestamp
-    @Column(name = "payment_date")
+    @Column(name = "transaction_id", unique = true, length = 100)
+    private String transactionId;
+      @Column(name = "payment_date")
     private LocalDateTime paymentDate;
     
     @Column(name = "processed_date")
     private LocalDateTime processedDate;
     
+    @Column(name = "payment_description", length = 500)
+    private String paymentDescription;
+    
     @Column(name = "gateway_response", length = 1000)
     private String gatewayResponse;
     
+    @Column(name = "notes", length = 500)
+    private String notes;
+    
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
     // Enums
     public enum PaymentMethod {
-        CASH, BANK_TRANSFER, VNPAY, MOMO, ZALOPAY, CREDIT_CARD
+        CASH, BANK_TRANSFER, CREDIT_CARD, MOMO, ZALOPAY
     }
-    
-    public enum PaymentStatus {
-        PENDING, SUCCESS, FAILED, CANCELLED, REFUNDED
+      public enum PaymentStatus {
+        PENDING, COMPLETED, FAILED, REFUNDED, SUCCESS, CANCELLED
     }
     
     // Constructors
     public Payment() {}
     
-    public Payment(Booking booking, PaymentMethod paymentMethod, BigDecimal amount) {
+    public Payment(Booking booking, BigDecimal amount, PaymentMethod paymentMethod) {
         this.booking = booking;
-        this.paymentMethod = paymentMethod;
         this.amount = amount;
+        this.paymentMethod = paymentMethod;
     }
     
     // Getters and Setters
@@ -85,14 +94,6 @@ public class Payment {
         this.booking = booking;
     }
     
-    public PaymentMethod getPaymentMethod() {
-        return paymentMethod;
-    }
-    
-    public void setPaymentMethod(PaymentMethod paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-    
     public BigDecimal getAmount() {
         return amount;
     }
@@ -101,12 +102,12 @@ public class Payment {
         this.amount = amount;
     }
     
-    public String getTransactionId() {
-        return transactionId;
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
     }
     
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
     
     public PaymentStatus getPaymentStatus() {
@@ -117,12 +118,12 @@ public class Payment {
         this.paymentStatus = paymentStatus;
     }
     
-    public String getPaymentDescription() {
-        return paymentDescription;
+    public String getTransactionId() {
+        return transactionId;
     }
     
-    public void setPaymentDescription(String paymentDescription) {
-        this.paymentDescription = paymentDescription;
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
     }
     
     public LocalDateTime getPaymentDate() {
@@ -133,6 +134,29 @@ public class Payment {
         this.paymentDate = paymentDate;
     }
     
+    public String getNotes() {
+        return notes;
+    }
+    
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+      public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+    
     public LocalDateTime getProcessedDate() {
         return processedDate;
     }
@@ -141,11 +165,32 @@ public class Payment {
         this.processedDate = processedDate;
     }
     
+    public String getPaymentDescription() {
+        return paymentDescription;
+    }
+    
+    public void setPaymentDescription(String paymentDescription) {
+        this.paymentDescription = paymentDescription;
+    }
+    
     public String getGatewayResponse() {
         return gatewayResponse;
     }
     
     public void setGatewayResponse(String gatewayResponse) {
         this.gatewayResponse = gatewayResponse;
+    }
+    
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "paymentId=" + paymentId +
+                ", amount=" + amount +
+                ", paymentMethod=" + paymentMethod +
+                ", paymentStatus=" + paymentStatus +
+                ", transactionId='" + transactionId + '\'' +
+                ", paymentDate=" + paymentDate +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

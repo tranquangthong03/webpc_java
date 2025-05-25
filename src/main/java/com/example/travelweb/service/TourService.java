@@ -137,8 +137,7 @@ public class TourService {
         
         tourRepository.deleteById(id);
     }
-    
-    // Lấy tours nổi bật
+      // Lấy tours nổi bật
     public List<Tour> getFeaturedTours() {
         return tourRepository.findByFeaturedTrueAndStatus(Tour.Status.ACTIVE);
     }
@@ -146,13 +145,13 @@ public class TourService {
     // Lấy top tours nổi bật (có giới hạn)
     public List<Tour> getTopFeaturedTours(int limit) {
         Pageable pageable = PageRequest.of(0, limit);
-        return tourRepository.findTopFeaturedTours(Tour.Status.ACTIVE, pageable);
+        return tourRepository.findByFeaturedTrueAndStatusOrderByCreatedAtDesc(Tour.Status.ACTIVE, pageable);
     }
     
     // Lấy tours mới nhất
     public List<Tour> getLatestTours(int limit) {
         Pageable pageable = PageRequest.of(0, limit);
-        return tourRepository.findLatestTours(Tour.Status.ACTIVE, pageable);
+        return tourRepository.findByStatusOrderByCreatedAtDesc(Tour.Status.ACTIVE, pageable);
     }
     
     // Lấy tours theo category
@@ -184,20 +183,18 @@ public class TourService {
     public List<Tour> getToursByDifficulty(Tour.DifficultyLevel level) {
         return tourRepository.findByDifficultyLevelAndStatus(level, Tour.Status.ACTIVE);
     }
-    
-    // Lấy tours có giảm giá
+      // Lấy tours có giảm giá
     public List<Tour> getToursWithDiscount() {
-        return tourRepository.findToursWithDiscount(Tour.Status.ACTIVE);
+        return tourRepository.findToursWithDiscount();
     }
-    
-    // Tìm kiếm tours với filters và phân trang
+      // Tìm kiếm tours với filters và phân trang
     public Page<Tour> searchToursWithFilters(Long categoryId, Long destinationId, String keyword,
                                            BigDecimal minPrice, BigDecimal maxPrice,
-                                           Tour.DifficultyLevel difficultyLevel,
+                                           Integer durationDays,
                                            int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return tourRepository.findToursWithFilters(categoryId, destinationId, keyword,
-                minPrice, maxPrice, difficultyLevel, Tour.Status.ACTIVE, pageable);
+        return tourRepository.findToursWithFilters(categoryId, destinationId, 
+                minPrice, maxPrice, durationDays, keyword, pageable);
     }
     
     // Đếm số tour theo category

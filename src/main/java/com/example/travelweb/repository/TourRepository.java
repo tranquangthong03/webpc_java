@@ -19,10 +19,14 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     Optional<Tour> findByTourCode(String tourCode);
     
     // Tìm tour active
-    List<Tour> findByStatus(Tour.Status status);
-    
-    // Tìm tour featured
+    List<Tour> findByStatus(Tour.Status status);    // Tìm tour featured
     List<Tour> findByFeaturedTrueAndStatus(Tour.Status status);
+    
+    // Tìm tour featured với phân trang
+    List<Tour> findByFeaturedTrueAndStatusOrderByCreatedAtDesc(Tour.Status status, Pageable pageable);
+    
+    // Tìm tour mới nhất
+    List<Tour> findByStatusOrderByCreatedAtDesc(Tour.Status status, Pageable pageable);
     
     // Tìm tour theo category
     List<Tour> findByCategoryCategoryIdAndStatus(Long categoryId, Tour.Status status);
@@ -68,11 +72,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
            "WHERE t.status = 'ACTIVE' AND b.bookingStatus = 'CONFIRMED' " +
            "GROUP BY t ORDER BY COUNT(b) DESC")
     List<Tour> findTopBookedTours(Pageable pageable);
-    
-    // Tour mới nhất
-    List<Tour> findByStatusOrderByCreatedAtDesc(Tour.Status status, Pageable pageable);
-    
-    // Tour có giảm giá
+      // Tour có giảm giá
     @Query("SELECT t FROM Tour t WHERE t.discountPercentage > 0 AND t.status = 'ACTIVE'")
     List<Tour> findToursWithDiscount();
     

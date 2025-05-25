@@ -102,4 +102,26 @@ public class Category {
     public void setTours(List<Tour> tours) {
         this.tours = tours;
     }
+    
+    // Utility methods
+    public void addTour(Tour tour) {
+        tours.add(tour);
+        tour.setCategory(this);
+    }
+    
+    public void removeTour(Tour tour) {
+        tours.remove(tour);
+        tour.setCategory(null);
+    }
+    
+    @Override
+    public String toString() {
+        return "Category{" +
+                "categoryId=" + categoryId +
+                ", categoryName='" + categoryName + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

@@ -32,19 +32,16 @@ public class TourController {
                            @RequestParam(defaultValue = "12") int size,
                            @RequestParam(required = false) Long categoryId,
                            @RequestParam(required = false) Long destinationId,
-                           @RequestParam(required = false) String keyword,
-                           @RequestParam(required = false) BigDecimal minPrice,
+                           @RequestParam(required = false) String keyword,                           @RequestParam(required = false) BigDecimal minPrice,
                            @RequestParam(required = false) BigDecimal maxPrice,
-                           @RequestParam(required = false) Tour.DifficultyLevel difficultyLevel,
+                           @RequestParam(required = false) Integer durationDays,
                            Model model) {
         
         Page<Tour> tours = tourService.searchToursWithFilters(
-            categoryId, destinationId, keyword, minPrice, maxPrice, difficultyLevel, page, size);
-        
-        model.addAttribute("tours", tours);
+            categoryId, destinationId, keyword, minPrice, maxPrice, durationDays, page, size);
+          model.addAttribute("tours", tours);
         model.addAttribute("categories", categoryService.getActiveCategories());
         model.addAttribute("destinations", destinationService.getActiveDestinations());
-        model.addAttribute("difficultyLevels", Tour.DifficultyLevel.values());
         
         // Giữ lại các tham số filter
         model.addAttribute("currentCategoryId", categoryId);
@@ -52,7 +49,7 @@ public class TourController {
         model.addAttribute("currentKeyword", keyword);
         model.addAttribute("currentMinPrice", minPrice);
         model.addAttribute("currentMaxPrice", maxPrice);
-        model.addAttribute("currentDifficultyLevel", difficultyLevel);
+        model.addAttribute("currentDurationDays", durationDays);
         
         return "tours/list";
     }
