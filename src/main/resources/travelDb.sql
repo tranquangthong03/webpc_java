@@ -1,0 +1,2 @@
+-- File SQL sẽ được thêm vào sau khi xem nội dung từ attachment
+-- Đây là placeholder cho database schema
