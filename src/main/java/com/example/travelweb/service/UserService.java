@@ -1,5 +1,6 @@
 package com.example.travelweb.service;
 
+import com.example.travelweb.dto.UserRegistrationDto;
 import com.example.travelweb.entity.User;
 import com.example.travelweb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class UserService {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
     // Lấy tất cả users
     public List<User> getAllUsers() {
@@ -38,6 +42,34 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
     
+    // Phương thức cho authentication - trả về User thay vì Optional
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+    
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
+    
+    // Tạo user từ DTO đăng ký
+    public User createUser(UserRegistrationDto registrationDto) {
+        User user = new User();
+        user.setUsername(registrationDto.getUsername());
+        user.setEmail(registrationDto.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setFullName(registrationDto.getFullName());
+        user.setPhone(registrationDto.getPhone());
+        user.setAddress(registrationDto.getAddress());
+        user.setDateOfBirth(registrationDto.getDateOfBirth());
+        user.setGender(registrationDto.getGender() != null ? 
+            User.Gender.valueOf(registrationDto.getGender().toUpperCase()) : null);
+        user.setRole(User.Role.CUSTOMER); // Mặc định là customer
+        user.setStatus(User.Status.ACTIVE);
+        user.setCreatedAt(LocalDateTime.now());
+        
+        return userRepository.save(user);
+    }
+    
     // Tạo user mới
     public User createUser(User user) {
         // Kiểm tra username và email đã tồn tại
@@ -48,6 +80,11 @@ public class UserService {
             throw new RuntimeException("Email đã tồn tại: " + user.getEmail());
         }
         
+        return userRepository.save(user);
+    }
+    
+    // Cập nhật user (overload method)
+    public User updateUser(User user) {
         return userRepository.save(user);
     }
     
@@ -78,6 +115,26 @@ public class UserService {
         user.setAvatarUrl(userDetails.getAvatarUrl());
         
         return userRepository.save(user);
+    }
+    
+    // Đổi mật khẩu
+    public boolean changePassword(String username, String currentPassword, String newPassword) {
+        User user = findByUsername(username);
+        if (user == null) {
+            return false;
+        }
+        
+        // Kiểm tra mật khẩu hiện tại
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            return false;
+        }
+        
+        // Cập nhật mật khẩu mới
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        
+        return true;
     }
     
     // Thay đổi role user
