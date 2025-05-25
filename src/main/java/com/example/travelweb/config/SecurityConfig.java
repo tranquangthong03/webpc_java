@@ -44,23 +44,67 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
-                // Public endpoints
-                .requestMatchers("/", "/home", "/tours/**", "/destinations/**", 
-                               "/contact", "/about", "/search").permitAll()
+                // ==================== PUBLIC ENDPOINTS ====================
+                // Trang chủ và thông tin công khai
+                .requestMatchers("/", "/home", "/about", "/contact").permitAll()
+                
+                // Xem tours và destinations (không cần đăng nhập)
+                .requestMatchers("/tours", "/tours/*/view", "/tours/search").permitAll()
+                .requestMatchers("/destinations", "/destinations/*/view").permitAll()
+                .requestMatchers("/categories", "/categories/*/tours").permitAll()
+                
+                // Authentication endpoints
                 .requestMatchers("/auth/login", "/auth/register").permitAll()
+                .requestMatchers("/auth/login-success").permitAll()
+                
+                // Static resources
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll() // For H2 console if needed
                 
-                // Admin endpoints
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
+                // ==================== ADMIN ENDPOINTS ====================
+                // Dashboard và quản lý chung (ADMIN + STAFF)
+                .requestMatchers("/admin", "/admin/", "/admin/dashboard").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/admin/statistics").hasAnyRole("ADMIN", "STAFF")
                 
-                // User profile endpoints
+                // Quản lý người dùng (chỉ ADMIN)
+                .requestMatchers("/admin/users/**").hasRole("ADMIN")
+                
+                // Quản lý tours (ADMIN có thể thêm/sửa/xóa, STAFF chỉ xem)
+                .requestMatchers("/admin/tours", "/admin/tours/list").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/admin/tours/new", "/admin/tours/*/edit", 
+                               "/admin/tours/save", "/admin/tours/*/delete").hasRole("ADMIN")
+                
+                // Quản lý categories (chỉ ADMIN)
+                .requestMatchers("/admin/categories/**").hasRole("ADMIN")
+                
+                // Quản lý destinations (chỉ ADMIN)
+                .requestMatchers("/admin/destinations/**").hasRole("ADMIN")
+                
+                // Quản lý bookings (ADMIN + STAFF có thể xem, ADMIN có thể hủy)
+                .requestMatchers("/admin/bookings", "/admin/bookings/list", 
+                               "/admin/bookings/*/view").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/admin/bookings/*/confirm").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/admin/bookings/*/cancel").hasRole("ADMIN")
+                
+                // Quản lý payments (ADMIN + STAFF có thể xem, ADMIN có thể xác nhận)
+                .requestMatchers("/admin/payments", "/admin/payments/list").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/admin/payments/*/confirm").hasRole("ADMIN")
+                
+                // ==================== USER ENDPOINTS ====================
+                // Profile management (tất cả user đã đăng nhập)
                 .requestMatchers("/auth/profile", "/auth/change-password").authenticated()
                 
-                // Booking endpoints
-                .requestMatchers("/bookings/**").authenticated()
+                // Booking endpoints (chỉ CUSTOMER và ADMIN)
+                .requestMatchers("/bookings/new", "/bookings/create").hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers("/bookings/my-bookings").hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers("/bookings/*/view").authenticated()
+                .requestMatchers("/bookings/*/cancel").hasAnyRole("CUSTOMER", "ADMIN")
                 
-                // Any other request needs authentication
+                // Payment endpoints (chỉ CUSTOMER và ADMIN)
+                .requestMatchers("/payments/**").hasAnyRole("CUSTOMER", "ADMIN")
+                
+                // ==================== PROTECTED ENDPOINTS ====================
+                // Các endpoint khác cần authentication
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -93,6 +137,9 @@ public class SecurityConfig {
             )
             .headers(headers -> headers
                 .frameOptions().sameOrigin() // Allow frames from same origin for H2 console
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedPage("/auth/access-denied") // Trang báo lỗi khi không có quyền
             );
 
         return http.build();
