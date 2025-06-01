@@ -341,8 +341,8 @@
                                         <div class="ms-3 flex-grow-1">
                                             <div class="fw-bold" th:text="${tour.tourName}">Tour Name</div>
                                             <small class="text-muted">
-                                                <span th:text="${tour.category.categoryName}">Category</span> - 
-                                                <span th:text="${tour.destination.destinationName}">Destination</span>
+                                                <span th:text="${tour.category != null ? tour.category.categoryName : 'Không có'}">Category</span> - 
+                                                <span th:text="${tour.destination != null ? tour.destination.destinationName : 'Không có'}">Destination</span>
                                             </small>
                                         </div>
                                         <div class="text-end">

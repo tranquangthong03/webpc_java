@@ -5,7 +5,7 @@
 </head>
 <body>
     <!-- Navigation Fragment -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top" th:fragment="navbar">
+    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary w-100">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
                 <i class="fas fa-globe-americas"></i> Travel Web
@@ -46,6 +46,12 @@
                             <i class="fas fa-phone"></i> Liên hệ
                         </a>
                     </li>
+                    <!-- Thêm mục Quản lý cho ADMIN và STAFF -->
+                    <li class="nav-item" th:if="${#authorization.expression('hasAnyRole(''ADMIN'', ''STAFF'')')}">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-cogs"></i> Quản lý
+                        </a>
+                    </li>
                 </ul>
                 <div class="d-flex">
                     <form class="d-flex me-3" action="/tours/search" method="get">
@@ -68,28 +74,33 @@
                     <!-- Hiển thị khi đã đăng nhập -->
                     <div sec:authorize="isAuthenticated()" class="dropdown">
                         <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user"></i> <span sec:authentication="name">Username</span>
+                            <i class="fas fa-user"></i>
+                            <span th:if="${#authentication != null}" th:text="${#authentication.name}">Username</span>
+                            <!-- Debug: Hiển thị quyền -->
+                            <small th:if="${#authentication != null}" class="badge bg-warning" th:text="${#authentication.authorities}">ROLES</small>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="/auth/profile">
-                                <i class="fas fa-user-circle"></i> Thông tin cá nhân
-                            </a></li>
-                            <li><a class="dropdown-item" href="/user/bookings">
-                                <i class="fas fa-calendar-check"></i> Đặt tour của tôi
-                            </a></li>
-                            <!-- Admin Panel - chỉ hiển thị cho ADMIN và STAFF -->
-                            <li sec:authorize="hasRole('ADMIN') or hasRole('STAFF')">
+                            <li>
+                                <a class="dropdown-item" href="/auth/profile">
+                                    <i class="fas fa-user-circle"></i> Thông tin cá nhân
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/user/bookings">
+                                    <i class="fas fa-calendar-check"></i> Đặt tour của tôi
+                                </a>
+                            </li>
+                            <!-- Dashboard Admin - chỉ hiển thị cho ADMIN và STAFF -->
+                            <li sec:authorize="hasAnyAuthority('ROLE_ADMIN','ROLE_STAFF')">
                                 <a class="dropdown-item" href="/admin/dashboard">
-                                    <i class="fas fa-cogs"></i> Admin Panel
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard Admin
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form th:action="@{/auth/logout}" method="post" style="margin: 0;">
-                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
-                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                                    </button>
-                                </form>
+                                <a class="dropdown-item" href="/auth/logout">
+                                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                </a>
                             </li>
                         </ul>
                     </div>

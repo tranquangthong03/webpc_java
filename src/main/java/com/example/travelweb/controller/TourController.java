@@ -9,13 +9,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/tours")
 public class TourController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TourController.class);
     
     @Autowired
     private TourService tourService;
@@ -57,23 +62,83 @@ public class TourController {
     // Chi tiết tour
     @GetMapping("/{id}")
     public String tourDetail(@PathVariable Long id, Model model) {
-        Optional<Tour> tourOptional = tourService.getTourById(id);
-        
-        if (tourOptional.isEmpty()) {
-            return "redirect:/tours?error=notfound";
+        try {
+            logger.info("Đang xem chi tiết tour với ID: {}", id);
+            Optional<Tour> tourOptional = tourService.getTourById(id);
+            
+            if (tourOptional.isEmpty()) {
+                logger.warn("Không tìm thấy tour với ID: {}", id);
+                model.addAttribute("errorMessage", "Tour không tồn tại hoặc đã bị xóa.");
+                return "error/tour-error";
+            }
+            
+            Tour tour = tourOptional.get();
+            
+            // Kiểm tra tour có trạng thái ACTIVE không
+            if (tour.getStatus() != Tour.Status.ACTIVE) {
+                logger.warn("Tour ID {} không active, status = {}", id, tour.getStatus());
+                model.addAttribute("errorMessage", "Tour này hiện không khả dụng.");
+                return "error/tour-error";
+            }
+            
+            // Kiểm tra các thuộc tính có thể null và xử lý
+            if (tour.getCategory() == null) {
+                logger.warn("Tour ID {} không có category", id);
+                model.addAttribute("categoryMissing", true);
+            }
+            
+            if (tour.getDestination() == null) {
+                logger.warn("Tour ID {} không có destination", id);
+                model.addAttribute("destinationMissing", true);
+            }
+            
+            // Đảm bảo itineraries không null để tránh NPE
+            if (tour.getItineraries() == null) {
+                tour.setItineraries(java.util.Collections.emptyList());
+                logger.warn("Tour ID {} có itineraries null, đã thiết lập thành danh sách rỗng", id);
+            }
+            
+            // Kiểm tra và đảm bảo các trường chuỗi không null
+            if (tour.getIncludes() == null) tour.setIncludes("");
+            if (tour.getExcludes() == null) tour.setExcludes("");
+            if (tour.getDescription() == null) tour.setDescription("");
+            
+            model.addAttribute("tour", tour);
+            
+            // Lấy các tour liên quan (cùng category hoặc destination)
+            try {
+                if (tour.getCategory() != null) {
+                    model.addAttribute("relatedTours", tourService.getToursByCategory(tour.getCategory().getCategoryId())
+                            .stream()
+                            .filter(t -> !t.getTourId().equals(id))
+                            .filter(t -> t.getStatus() == Tour.Status.ACTIVE)
+                            .limit(4)
+                            .toList());
+                } else if (tour.getDestination() != null) {
+                    // Thử lấy tour theo điểm đến nếu không có danh mục
+                    model.addAttribute("relatedTours", tourService.getToursByDestination(tour.getDestination().getDestinationId())
+                            .stream()
+                            .filter(t -> !t.getTourId().equals(id))
+                            .filter(t -> t.getStatus() == Tour.Status.ACTIVE)
+                            .limit(4)
+                            .toList());
+                } else {
+                    // Nếu không có cả danh mục và điểm đến, hiển thị danh sách rỗng
+                    model.addAttribute("relatedTours", java.util.Collections.emptyList());
+                }
+            } catch (Exception e) {
+                logger.warn("Không thể lấy danh sách tour liên quan: {}", e.getMessage());
+                model.addAttribute("relatedTours", java.util.Collections.emptyList());
+            }
+            
+            return "tours/detail";
+        } catch (Exception e) {
+            logger.error("Lỗi khi hiển thị chi tiết tour ID {}: {}", id, e.getMessage(), e);
+            model.addAttribute("errorMessage", "Có lỗi xảy ra khi hiển thị thông tin tour: " + e.getMessage());
+            model.addAttribute("errorType", e.getClass().getSimpleName());
+            model.addAttribute("requestedTourId", id);
+            return "error/tour-error";
         }
-        
-        Tour tour = tourOptional.get();
-        model.addAttribute("tour", tour);
-        
-        // Lấy các tour liên quan (cùng category hoặc destination)
-        model.addAttribute("relatedTours", tourService.getToursByCategory(tour.getCategory().getCategoryId())
-                .stream()
-                .filter(t -> !t.getTourId().equals(id))
-                .limit(4)
-                .toList());
-        
-        return "tours/detail";
     }
     
     // Tour theo category

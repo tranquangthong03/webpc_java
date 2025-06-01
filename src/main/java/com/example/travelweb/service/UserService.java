@@ -27,6 +27,11 @@ public class UserService {
         return userRepository.findAll();
     }
     
+    // Lấy tất cả users (alias)
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+    
     // Lấy user theo ID
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
@@ -200,6 +205,16 @@ public class UserService {
     // Đếm số user theo role
     public long countUsersByRole(User.Role role) {
         return userRepository.countByRole(role);
+    }
+    
+    // Đếm số user theo role (alias cho AdminController)
+    public long countByRole(User.Role role) {
+        return userRepository.countByRole(role);
+    }
+    
+    // Đếm số user theo status (cho AdminController)
+    public long countByStatus(User.Status status) {
+        return userRepository.countByStatus(status);
     }
     
     // Đếm số user active

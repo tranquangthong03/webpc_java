@@ -404,9 +404,9 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-primary" th:text="${tour.category?.categoryName}">Category</span>
+                                                    <span class="badge bg-primary" th:text="${tour.category != null ? tour.category.categoryName : 'Không có'}">Category</span>
                                                 </td>
-                                                <td th:text="${tour.destination?.destinationName}">Destination</td>
+                                                <td th:text="${tour.destination != null ? tour.destination.destinationName : 'Không có'}">Destination</td>
                                                 <td>
                                                     <span class="badge bg-info" th:text="${tour.schedules?.size() ?: 0}">0</span>
                                                 </td>

@@ -230,6 +230,11 @@ public class PaymentService {
         return paymentRepository.countByPaymentStatus(status);
     }
     
+    // Thống kê payment theo status (alias cho AdminController)
+    public long countByStatus(Payment.Status status) {
+        return paymentRepository.countByPaymentStatus(Payment.PaymentStatus.valueOf(status.name()));
+    }
+    
     // Thống kê payment theo method
     public long countPaymentsByMethod(Payment.PaymentMethod method) {
         return paymentRepository.countByPaymentMethod(method);

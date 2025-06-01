@@ -1,8 +1,23 @@
 /* Custom CSS for Travel Web */
 
+/* Reset margins and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    overflow-x: hidden;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
+    padding-top: 56px; /* Match standard navbar height */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .navbar-brand {
@@ -22,6 +37,7 @@ body {
     border: none;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+    margin-bottom: 20px;
 }
 
 .card:hover {
@@ -76,4 +92,92 @@ footer {
     .jumbotron h1 {
         font-size: 2rem;
     }
+}
+
+/* Navbar and sticky elements */
+.navbar {
+    z-index: 1030;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px; /* Fixed height for navbar */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sticky-card {
+    position: sticky;
+    top: 76px; /* navbar height + 20px margin */
+    z-index: 900;
+}
+
+/* Đảm bảo content không bị đè bởi navbar */
+.main-content {
+    padding-top: 20px;
+    z-index: 1;
+    position: relative;
+}
+
+/* Thêm CSS cho các card */
+.card-header {
+    background-color: rgba(0, 123, 255, 0.05);
+    border-bottom: 1px solid rgba(0, 123, 255, 0.1);
+}
+
+/* Thêm CSS cho hiệu ứng hover trên các nút */
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* CSS cho tour detail page */
+.tour-image {
+    height: 400px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Timeline CSS cho tab lịch trình */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }

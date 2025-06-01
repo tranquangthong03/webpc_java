@@ -28,13 +28,11 @@ public class Tour {
     private String tourCode;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    @NotNull
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destination_id", nullable = false)
-    @NotNull
+    @JoinColumn(name = "destination_id", nullable = true)
     private Destination destination;
     
     @Column(name = "description", length = 2000)
@@ -93,8 +91,11 @@ public class Tour {
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TourSchedule> schedules = new ArrayList<>();
     
+    // Tạm thời comment lại phần này để tránh lỗi với bảng tour_images không tồn tại
+    /*
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TourImage> images = new ArrayList<>();
+    */
     
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TourItinerary> itineraries = new ArrayList<>();
@@ -290,14 +291,6 @@ public class Tour {
     
     public void setSchedules(List<TourSchedule> schedules) {
         this.schedules = schedules;
-    }
-    
-    public List<TourImage> getImages() {
-        return images;
-    }
-    
-    public void setImages(List<TourImage> images) {
-        this.images = images;
     }
     
     public List<TourItinerary> getItineraries() {

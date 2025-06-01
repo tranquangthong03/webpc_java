@@ -238,6 +238,11 @@ public class BookingService {
         return bookingRepository.countByBookingStatus(status);
     }
     
+    // Thống kê booking theo status (alias cho AdminController)
+    public long countByStatus(Booking.Status status) {
+        return bookingRepository.countByBookingStatus(Booking.BookingStatus.valueOf(status.name()));
+    }
+    
     // Thống kê booking theo user
     public long countBookingsByUser(Long userId) {
         return bookingRepository.countByUserUserId(userId);

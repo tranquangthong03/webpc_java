@@ -419,14 +419,20 @@
                     <div sec:authorize="isAuthenticated()" class="dropdown">
                         <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user"></i> <span sec:authentication="name">Username</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        </button>                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="/auth/profile">
                                 <i class="fas fa-user-circle"></i> Thông tin cá nhân
                             </a></li>
                             <li><a class="dropdown-item" href="/user/bookings">
                                 <i class="fas fa-calendar-check"></i> Đặt tour của tôi
                             </a></li>
+                            <!-- Admin Dashboard - chỉ hiển thị cho ADMIN -->
+                            <li sec:authorize="hasRole('ADMIN')">
+                                <a class="dropdown-item text-warning fw-bold" href="/admin/dashboard">
+                                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                                </a>
+                            </li>
+                            <li sec:authorize="hasRole('ADMIN')"><hr class="dropdown-divider"></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form th:action="@{/auth/logout}" method="post" style="margin: 0;">
@@ -520,7 +526,7 @@
                             <h5 class="card-title fw-bold" th:text="${tour.tourName}">Tour Name</h5>
                             <p class="card-text text-muted small">
                                 <i class="fas fa-map-marker-alt text-primary"></i> 
-                                <span th:text="${tour.destination.destinationName}">Destination</span>
+                                <span th:text="${tour.destination != null ? tour.destination.destinationName : 'Không có'}">Destination</span>
                             </p>
                             <p class="card-text" th:text="${#strings.abbreviate(tour.description, 100)}">Description</p>
                             <div class="mt-auto">
@@ -590,7 +596,7 @@
                             <h6 class="card-title fw-bold" th:text="${tour.tourName}">Tour Name</h6>
                             <p class="card-text small text-muted">
                                 <i class="fas fa-map-marker-alt text-primary"></i> 
-                                <span th:text="${tour.destination.destinationName}">Destination</span>
+                                <span th:text="${tour.destination != null ? tour.destination.destinationName : 'Không có'}">Destination</span>
                             </p>
                             <div class="mt-auto">
                                 <span class="tour-price h6" th:text="${#numbers.formatCurrency(tour.price)}">Price</span>

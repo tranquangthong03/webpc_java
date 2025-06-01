@@ -16,10 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -27,6 +32,8 @@ import java.util.List;
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
 public class AdminController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     @Autowired
     private UserService userService;
@@ -49,26 +56,41 @@ public class AdminController {
     // Dashboard chính
     @GetMapping({"/", "/dashboard"})
     public String dashboard(Model model) {
-        // Thống kê tổng quan
-        model.addAttribute("totalUsers", userService.getAllUsers().size());
-        model.addAttribute("totalTours", tourService.getAllTours().size());
-        model.addAttribute("totalCategories", categoryService.getAllCategories().size());
-        model.addAttribute("totalDestinations", destinationService.getAllDestinations().size());
+        // Log authentication information
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        logger.info("Dashboard access - User: {}, Authorities: {}", auth.getName(), auth.getAuthorities());
+        logger.info("Has ROLE_ADMIN: {}", auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        logger.info("Has ROLE_STAFF: {}", auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_STAFF")));
         
-        // Thống kê theo role
-        model.addAttribute("adminCount", userService.countUsersByRole(User.Role.ADMIN));
-        model.addAttribute("staffCount", userService.countUsersByRole(User.Role.STAFF));
-        model.addAttribute("customerCount", userService.countUsersByRole(User.Role.CUSTOMER));
-        model.addAttribute("activeUsers", userService.countActiveUsers());
+        // Lấy số lượng người dùng theo vai trò
+        long adminCount = userService.countByRole(User.Role.ADMIN);
+        long staffCount = userService.countByRole(User.Role.STAFF);
+        long customerCount = userService.countByRole(User.Role.CUSTOMER);
+        long inactiveUserCount = userService.countByStatus(User.Status.INACTIVE);
         
-        // Thống kê booking và payment
-        model.addAttribute("totalBookings", bookingService.countBookingsByStatus(Booking.BookingStatus.CONFIRMED));
-        model.addAttribute("pendingBookings", bookingService.countBookingsByStatus(Booking.BookingStatus.PENDING));
-        model.addAttribute("totalPayments", paymentService.countPaymentsByStatus(Payment.PaymentStatus.SUCCESS));
+        // Lấy số lượng đặt tour theo trạng thái
+        long pendingBookings = bookingService.countByStatus(Booking.Status.PENDING);
+        long confirmedBookings = bookingService.countByStatus(Booking.Status.CONFIRMED);
         
-        // Dữ liệu gần đây
-        model.addAttribute("recentUsers", userService.getAllUsers().stream().limit(5).toList());
-        model.addAttribute("recentTours", tourService.getAllTours().stream().limit(5).toList());
+        // Lấy số lượng thanh toán thành công
+        long successPayments = paymentService.countByStatus(Payment.Status.SUCCESS);
+        
+        // Lấy danh sách người dùng mới nhất
+        List<User> recentUsers = userService.findAll();
+        
+        // Lấy danh sách tour
+        List<Tour> allTours = tourService.findAll();
+        
+        // Add to model
+        model.addAttribute("adminCount", adminCount);
+        model.addAttribute("staffCount", staffCount);
+        model.addAttribute("customerCount", customerCount);
+        model.addAttribute("inactiveUserCount", inactiveUserCount);
+        model.addAttribute("pendingBookings", pendingBookings);
+        model.addAttribute("confirmedBookings", confirmedBookings);
+        model.addAttribute("successPayments", successPayments);
+        model.addAttribute("recentUsers", recentUsers);
+        model.addAttribute("allTours", allTours);
         
         return "admin/dashboard";
     }

@@ -36,6 +36,11 @@ public class TourService {
         return tourRepository.findAll();
     }
     
+    // Lấy tất cả tours (alias)
+    public List<Tour> findAll() {
+        return tourRepository.findAll();
+    }
+    
     // Lấy các tours active
     public List<Tour> getActiveTours() {
         return tourRepository.findByStatus(Tour.Status.ACTIVE);

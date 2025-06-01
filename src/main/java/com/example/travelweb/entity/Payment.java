@@ -68,6 +68,15 @@ public class Payment {
         PENDING, COMPLETED, FAILED, REFUNDED, SUCCESS, CANCELLED
     }
     
+    // Enum Status cho AdminController
+    public enum Status {
+        SUCCESS, PENDING, FAILED, REFUNDED, CANCELLED;
+        
+        public PaymentStatus toPaymentStatus() {
+            return PaymentStatus.valueOf(this.name());
+        }
+    }
+    
     // Constructors
     public Payment() {}
     

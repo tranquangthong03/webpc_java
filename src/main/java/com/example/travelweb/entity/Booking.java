@@ -97,6 +97,15 @@ public class Booking {
         UNPAID, PARTIAL, PAID, REFUNDED
     }
     
+    // Enum Status cho AdminController
+    public enum Status {
+        PENDING, CONFIRMED, CANCELLED, COMPLETED;
+        
+        public BookingStatus toBookingStatus() {
+            return BookingStatus.valueOf(this.name());
+        }
+    }
+    
     // Constructors
     public Booking() {}
     
