@@ -11,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -57,21 +59,59 @@ public class TourController {
     // Chi tiết tour
     @GetMapping("/{id}")
     public String tourDetail(@PathVariable Long id, Model model) {
+        System.out.println("DEBUG: Đang truy cập chi tiết tour với ID: " + id);
         Optional<Tour> tourOptional = tourService.getTourById(id);
         
         if (tourOptional.isEmpty()) {
+            System.out.println("DEBUG: Không tìm thấy tour với ID: " + id);
             return "redirect:/tours?error=notfound";
         }
         
         Tour tour = tourOptional.get();
+        System.out.println("DEBUG: Tìm thấy tour: " + tour.getTourName() + " (ID: " + tour.getTourId() + ")");
+        
+        // Kiểm tra chi tiết các trường quan trọng
+        System.out.println("DEBUG: Tour category: " + (tour.getCategory() != null ? tour.getCategory().getCategoryId() + " - " + tour.getCategory().getCategoryName() : "NULL"));
+        System.out.println("DEBUG: Tour destination: " + (tour.getDestination() != null ? tour.getDestination().getDestinationId() + " - " + tour.getDestination().getDestinationName() : "NULL"));
+        System.out.println("DEBUG: Tour status: " + tour.getStatus());
+        
+        // Kiểm tra các trường quan trọng
+        if (tour.getCategory() == null) {
+            System.out.println("DEBUG: Tour ID " + id + " không có category");
+            model.addAttribute("errorMessage", "Tour này thiếu thông tin danh mục");
+            return "error/tour-error";
+        }
+        
+        if (tour.getDestination() == null) {
+            System.out.println("DEBUG: Tour ID " + id + " không có destination");
+            model.addAttribute("errorMessage", "Tour này thiếu thông tin điểm đến");
+            return "error/tour-error";
+        }
+        
+        if (tour.getStatus() != Tour.Status.ACTIVE) {
+            System.out.println("DEBUG: Tour ID " + id + " không ở trạng thái ACTIVE: " + tour.getStatus());
+            model.addAttribute("errorMessage", "Tour này hiện không khả dụng");
+            return "error/tour-error";
+        }
+        
+        // Nếu mọi thứ OK, hiển thị chi tiết tour
+        System.out.println("DEBUG: Hiển thị chi tiết tour: " + tour.getTourName());
         model.addAttribute("tour", tour);
         
-        // Lấy các tour liên quan (cùng category hoặc destination)
-        model.addAttribute("relatedTours", tourService.getToursByCategory(tour.getCategory().getCategoryId())
-                .stream()
-                .filter(t -> !t.getTourId().equals(id))
-                .limit(4)
-                .toList());
+        try {
+            // Lấy các tour liên quan (cùng category hoặc destination)
+            List<Tour> relatedTours = tourService.getToursByCategory(tour.getCategory().getCategoryId())
+                    .stream()
+                    .filter(t -> !t.getTourId().equals(id))
+                    .limit(4)
+                    .toList();
+            System.out.println("DEBUG: Tìm thấy " + relatedTours.size() + " tour liên quan");
+            model.addAttribute("relatedTours", relatedTours);
+        } catch (Exception e) {
+            System.out.println("DEBUG: Lỗi khi lấy tour liên quan: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("relatedTours", new ArrayList<>());
+        }
         
         return "tours/detail";
     }
