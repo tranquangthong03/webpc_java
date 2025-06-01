@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user.userId != null ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'} + ' - Travel Web Admin'">Form người dùng - Travel Web Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .form-section {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .section-title {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .required {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>
+                            Admin Panel
+                        </h4>
+                        <small class="text-light opacity-75">Travel Web Management</small>
+                    </div>
+                    
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="fas fa-users me-2"></i>
+                                Quản lý người dùng
+                            </a>
+                        </div>
+                        
+                        <a class="nav-link" href="/admin/tours">
+                            <i class="fas fa-map-marked-alt me-2"></i>
+                            Quản lý Tours
+                        </a>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/categories">
+                                <i class="fas fa-tags me-2"></i>
+                                Danh mục
+                            </a>
+                        </div>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/destinations">
+                                <i class="fas fa-globe-asia me-2"></i>
+                                Điểm đến
+                            </a>
+                        </div>
+                        
+                        <a class="nav-link" href="/admin/bookings">
+                            <i class="fas fa-calendar-check me-2"></i>
+                            Đặt tour
+                        </a>
+                        
+                        <a class="nav-link" href="/admin/payments">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Thanh toán
+                        </a>
+                        
+                        <a class="nav-link" href="/admin/statistics">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Thống kê
+                        </a>
+                        
+                        <hr class="my-3">
+                        
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-2"></i>
+                            Về trang chủ
+                        </a>
+                        
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Đăng xuất
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>
+                            <i class="fas fa-user-edit me-2"></i>
+                            <span th:text="${user.userId != null ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}">Form người dùng</span>
+                        </h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/users">Người dùng</a></li>
+                                <li class="breadcrumb-item active" th:text="${user.userId != null ? 'Chỉnh sửa' : 'Thêm mới'}">Form</li>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <!-- Alert Messages -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- User Form -->
+                    <div class="form-card">
+                        <form th:action="@{/admin/users/save}" method="post" th:object="${user}">
+                            <input type="hidden" th:field="*{userId}">
+                            
+                            <!-- Thông tin đăng nhập -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-key me-2"></i>
+                                    Thông tin đăng nhập
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label">
+                                            Tên đăng nhập <span class="required">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="username" th:field="*{username}" 
+                                               required th:readonly="${user.userId != null}">
+                                        <div class="form-text">Tên đăng nhập không thể thay đổi sau khi tạo</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">
+                                            Email <span class="required">*</span>
+                                        </label>
+                                        <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row" th:if="${user.userId == null}">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">
+                                            Mật khẩu <span class="required">*</span>
+                                        </label>
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                               required minlength="6">
+                                        <div class="form-text">Mật khẩu phải có ít nhất 6 ký tự</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirmPassword" class="form-label">
+                                            Xác nhận mật khẩu <span class="required">*</span>
+                                        </label>
+                                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
+                                               required minlength="6">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Thông tin cá nhân -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-user me-2"></i>
+                                    Thông tin cá nhân
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fullName" class="form-label">
+                                            Họ và tên <span class="required">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Số điện thoại</label>
+                                        <input type="tel" class="form-control" id="phone" th:field="*{phone}">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="dateOfBirth" class="form-label">Ngày sinh</label>
+                                        <input type="date" class="form-control" id="dateOfBirth" th:field="*{dateOfBirth}">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="gender" class="form-label">Giới tính</label>
+                                        <select class="form-select" id="gender" th:field="*{gender}">
+                                            <option value="">Chọn giới tính</option>
+                                            <option value="Male">Nam</option>
+                                            <option value="Female">Nữ</option>
+                                            <option value="Other">Khác</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Địa chỉ</label>
+                                    <textarea class="form-control" id="address" th:field="*{address}" rows="3"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Phân quyền và trạng thái -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Phân quyền và trạng thái
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="role" class="form-label">
+                                            Vai trò <span class="required">*</span>
+                                        </label>
+                                        <select class="form-select" id="role" th:field="*{role}" required>
+                                            <option value="">Chọn vai trò</option>
+                                            <option value="ADMIN">Quản trị viên</option>
+                                            <option value="STAFF">Nhân viên</option>
+                                            <option value="CUSTOMER">Khách hàng</option>
+                                        </select>
+                                        <div class="form-text">
+                                            <small>
+                                                <strong>ADMIN:</strong> Toàn quyền quản lý hệ thống<br>
+                                                <strong>STAFF:</strong> Quản lý tours và bookings<br>
+                                                <strong>CUSTOMER:</strong> Đặt tour và quản lý tài khoản cá nhân
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="status" class="form-label">
+                                            Trạng thái <span class="required">*</span>
+                                        </label>
+                                        <select class="form-select" id="status" th:field="*{status}" required>
+                                            <option value="">Chọn trạng thái</option>
+                                            <option value="ACTIVE">Hoạt động</option>
+                                            <option value="INACTIVE">Không hoạt động</option>
+                                            <option value="BANNED">Bị cấm</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a href="/admin/users" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>
+                                    <span th:text="${user.userId != null ? 'Cập nhật' : 'Tạo mới'}">Lưu</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Validate password confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+            
+            if (password && confirmPassword) {
+                function validatePassword() {
+                    if (password.value !== confirmPassword.value) {
+                        confirmPassword.setCustomValidity('Mật khẩu xác nhận không khớp');
+                    } else {
+                        confirmPassword.setCustomValidity('');
+                    }
+                }
+                
+                password.addEventListener('change', validatePassword);
+                confirmPassword.addEventListener('keyup', validatePassword);
+            }
+        });
+    </script>
+</body>
+</html> 

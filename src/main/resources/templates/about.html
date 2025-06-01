@@ -63,11 +63,11 @@
                     <!-- Hiển thị khi chưa đăng nhập -->
                     <div sec:authorize="!isAuthenticated()">
                         <a href="/auth/login" class="btn btn-outline-light me-2">
-                            <i class="fas fa-sign-in-alt"></i> Đăng nhập
-                        </a>
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </a>
                         <a href="/auth/register" class="btn btn-light">
-                            <i class="fas fa-user-plus"></i> Đăng ký
-                        </a>
+                        <i class="fas fa-user-plus"></i> Đăng ký
+                    </a>
                     </div>
                     
                     <!-- Hiển thị khi đã đăng nhập -->
@@ -82,6 +82,12 @@
                             <li><a class="dropdown-item" href="/user/bookings">
                                 <i class="fas fa-calendar-check"></i> Đặt tour của tôi
                             </a></li>
+                            <!-- Admin Panel - chỉ hiển thị cho ADMIN và STAFF -->
+                            <li sec:authorize="hasRole('ADMIN') or hasRole('STAFF')">
+                                <a class="dropdown-item" href="/admin/dashboard">
+                                    <i class="fas fa-cogs"></i> Admin Panel
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form th:action="@{/auth/logout}" method="post" style="margin: 0;">

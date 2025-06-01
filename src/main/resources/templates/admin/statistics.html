@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê - Travel Web Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 2rem;
+        }
+        .table-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .filter-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        .realtime-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .export-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>
+                            Admin Panel
+                        </h4>
+                        <small class="text-light opacity-75">Travel Web Management</small>
+                    </div>
+                    
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="fas fa-users me-2"></i>
+                                Quản lý người dùng
+                            </a>
+                        </div>
+                        
+                        <a class="nav-link" href="/admin/tours">
+                            <i class="fas fa-map-marked-alt me-2"></i>
+                            Quản lý Tours
+                        </a>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/categories">
+                                <i class="fas fa-tags me-2"></i>
+                                Danh mục
+                            </a>
+                        </div>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/destinations">
+                                <i class="fas fa-globe-asia me-2"></i>
+                                Điểm đến
+                            </a>
+                        </div>
+                        
+                        <a class="nav-link" href="/admin/bookings">
+                            <i class="fas fa-calendar-check me-2"></i>
+                            Đặt tour
+                        </a>
+                        
+                        <a class="nav-link" href="/admin/payments">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Thanh toán
+                        </a>
+                        
+                        <a class="nav-link active" href="/admin/statistics">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Thống kê
+                        </a>
+                        
+                        <hr class="my-3">
+                        
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-2"></i>
+                            Về trang chủ
+                        </a>
+                        
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Đăng xuất
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2>
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Thống kê hệ thống
+                                <span class="realtime-indicator ms-2" title="Dữ liệu thời gian thực"></span>
+                            </h2>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                    <li class="breadcrumb-item active">Thống kê</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div>
+                            <button class="btn export-btn me-2" onclick="exportData()">
+                                <i class="fas fa-download me-2"></i>
+                                Xuất dữ liệu
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="refreshData()">
+                                <i class="fas fa-sync-alt me-2"></i>
+                                Làm mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Cảnh báo!</strong> <span th:text="${error}">Có lỗi xảy ra khi tải dữ liệu thống kê</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Filter Section -->
+                    <div class="filter-card">
+                        <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Bộ lọc thống kê</h5>
+                        <form method="get" action="/admin/statistics">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">Từ ngày</label>
+                                    <input type="date" class="form-control" name="startDate" th:value="${startDate}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Đến ngày</label>
+                                    <input type="date" class="form-control" name="endDate" th:value="${endDate}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Chu kỳ</label>
+                                    <select class="form-select" name="period">
+                                        <option value="day" th:selected="${selectedPeriod == 'day'}">Theo ngày</option>
+                                        <option value="week" th:selected="${selectedPeriod == 'week'}">Theo tuần</option>
+                                        <option value="month" th:selected="${selectedPeriod == 'month'}">Theo tháng</option>
+                                        <option value="year" th:selected="${selectedPeriod == 'year'}">Theo năm</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-search me-2"></i>
+                                        Áp dụng
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Overview Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-0" th:text="${totalUsers ?: 0}">0</h3>
+                                        <p class="mb-0">Tổng người dùng</p>
+                                        <small class="opacity-75">Active: <span th:text="${activeUsers ?: 0}">0</span></small>
+                                    </div>
+                                    <i class="fas fa-users stat-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-0" th:text="${totalTours ?: 0}">0</h3>
+                                        <p class="mb-0">Tổng tours</p>
+                                        <small class="opacity-75">Categories: <span th:text="${totalCategories ?: 0}">0</span></small>
+                                    </div>
+                                    <i class="fas fa-map-marked-alt stat-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-0" th:text="${totalBookings ?: 0}">0</h3>
+                                        <p class="mb-0">Tổng đặt tour</p>
+                                        <small class="opacity-75">Pending: <span th:text="${pendingBookings ?: 0}">0</span></small>
+                                    </div>
+                                    <i class="fas fa-calendar-check stat-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-0" th:text="${#numbers.formatCurrency(totalRevenue ?: 0)}">0 VNĐ</h3>
+                                        <p class="mb-0">Tổng doanh thu</p>
+                                        <small class="opacity-75">Destinations: <span th:text="${totalDestinations ?: 0}">0</span></small>
+                                    </div>
+                                    <i class="fas fa-dollar-sign stat-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row">
+                        <!-- Revenue Chart -->
+                        <div class="col-lg-8 mb-4">
+                            <div class="table-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5><i class="fas fa-chart-line me-2"></i>Doanh thu theo tháng</h5>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary active" onclick="updateChart('month')">Tháng</button>
+                                        <button type="button" class="btn btn-outline-primary" onclick="updateChart('week')">Tuần</button>
+                                        <button type="button" class="btn btn-outline-primary" onclick="updateChart('day')">Ngày</button>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="revenueChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Methods Chart -->
+                        <div class="col-lg-4 mb-4">
+                            <div class="table-card">
+                                <h5 class="mb-3"><i class="fas fa-credit-card me-2"></i>Phương thức thanh toán</h5>
+                                <div class="chart-container">
+                                    <canvas id="paymentMethodChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Statistics -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="table-card">
+                                <h5 class="mb-3"><i class="fas fa-users me-2"></i>Thống kê người dùng</h5>
+                                <div class="chart-container">
+                                    <canvas id="userRoleChart"></canvas>
+                                </div>
+                                <!-- User stats summary -->
+                                <div class="row mt-3">
+                                    <div class="col-4 text-center">
+                                        <div class="h5 text-primary" th:text="${adminCount ?: 0}">0</div>
+                                        <small class="text-muted">Admin</small>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <div class="h5 text-info" th:text="${staffCount ?: 0}">0</div>
+                                        <small class="text-muted">Staff</small>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <div class="h5 text-success" th:text="${customerCount ?: 0}">0</div>
+                                        <small class="text-muted">Customer</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6 mb-4">
+                            <div class="table-card">
+                                <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Trạng thái booking</h5>
+                                <div class="chart-container">
+                                    <canvas id="bookingStatusChart"></canvas>
+                                </div>
+                                <!-- Booking stats summary -->
+                                <div class="row mt-3">
+                                    <div class="col-3 text-center">
+                                        <div class="h6 text-success" th:text="${confirmedBookings ?: 0}">0</div>
+                                        <small class="text-muted">Confirmed</small>
+                                    </div>
+                                    <div class="col-3 text-center">
+                                        <div class="h6 text-warning" th:text="${pendingBookings ?: 0}">0</div>
+                                        <small class="text-muted">Pending</small>
+                                    </div>
+                                    <div class="col-3 text-center">
+                                        <div class="h6 text-danger" th:text="${cancelledBookings ?: 0}">0</div>
+                                        <small class="text-muted">Cancelled</small>
+                                    </div>
+                                    <div class="col-3 text-center">
+                                        <div class="h6 text-secondary" th:text="${completedBookings ?: 0}">0</div>
+                                        <small class="text-muted">Completed</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Tours Table -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5><i class="fas fa-trophy me-2"></i>Top tours được đặt nhiều nhất</h5>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="refreshTopTours()">
+                                        <i class="fas fa-sync-alt me-1"></i>
+                                        Làm mới
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Tên tour</th>
+                                                <th>Danh mục</th>
+                                                <th>Điểm đến</th>
+                                                <th>Số lượt đặt</th>
+                                                <th>Doanh thu ước tính</th>
+                                                <th>Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topToursTable">
+                                            <tr th:each="tour, iterStat : ${topTours ?: #lists.of()}">
+                                                <td th:text="${iterStat.count}">1</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img th:src="${tour.mainImageUrl}" class="rounded me-2" 
+                                                             style="width: 40px; height: 40px; object-fit: cover;" 
+                                                             th:alt="${tour.tourName}">
+                                                        <div>
+                                                            <div th:text="${tour.tourName}">Tour Name</div>
+                                                            <small class="text-muted" th:text="${tour.tourCode}">TOUR001</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-primary" th:text="${tour.category?.categoryName}">Category</span>
+                                                </td>
+                                                <td th:text="${tour.destination?.destinationName}">Destination</td>
+                                                <td>
+                                                    <span class="badge bg-info" th:text="${tour.schedules?.size() ?: 0}">0</span>
+                                                </td>
+                                                <td th:text="${#numbers.formatCurrency(tour.price)}">0 VNĐ</td>
+                                                <td>
+                                                    <span class="badge" 
+                                                          th:classappend="${tour.status?.name() == 'ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+                                                          th:text="${tour.status?.name() == 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}">Status</span>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${#lists.isEmpty(topTours ?: #lists.of())}">
+                                                <td colspan="7" class="text-center text-muted">Chưa có dữ liệu</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global chart variables
+        let revenueChart, paymentMethodChart, userRoleChart, bookingStatusChart;
+        
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            startRealtimeUpdates();
+        });
+        
+        function initializeCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            const revenueData = [
+                /*[# th:each="item : ${revenueByMonth ?: #lists.of()}" ]*/
+                {
+                    month: /*[[${item[0] + '/' + item[1]}]]*/ '2025/1',
+                    revenue: /*[[${item[2]}]]*/ 0
+                },
+                /*[/]*/
+            ];
+            
+            // Nếu không có dữ liệu, tạo dữ liệu mặc định
+            if (revenueData.length === 0 || (revenueData.length === 1 && revenueData[0].month === '2025/1')) {
+                const currentDate = new Date();
+                for (let i = 5; i >= 0; i--) {
+                    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                    revenueData.push({
+                        month: `${date.getFullYear()}/${date.getMonth() + 1}`,
+                        revenue: 0
+                    });
+                }
+            }
+            
+            revenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: revenueData.map(item => item.month),
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: revenueData.map(item => item.revenue),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND'
+                                    }).format(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Payment Method Chart
+            const paymentCtx = document.getElementById('paymentMethodChart').getContext('2d');
+            const paymentData = [
+                /*[# th:each="item : ${revenueByPaymentMethod ?: #lists.of()}" ]*/
+                {
+                    method: /*[[${item[0]}]]*/ 'VNPAY',
+                    amount: /*[[${item[1]}]]*/ 0
+                },
+                /*[/]*/
+            ];
+            
+            // Nếu không có dữ liệu, tạo dữ liệu mặc định
+            if (paymentData.length === 0 || (paymentData.length === 1 && paymentData[0].method === 'VNPAY' && paymentData[0].amount === 0)) {
+                paymentData.length = 0; // Clear array
+                paymentData.push(
+                    { method: 'VNPAY', amount: 0 },
+                    { method: 'MOMO', amount: 0 },
+                    { method: 'BANK_TRANSFER', amount: 0 }
+                );
+            }
+            
+            paymentMethodChart = new Chart(paymentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: paymentData.map(item => item.method),
+                    datasets: [{
+                        data: paymentData.map(item => item.amount),
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#f5576c',
+                            '#4facfe'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // User Role Chart
+            const userRoleCtx = document.getElementById('userRoleChart').getContext('2d');
+            userRoleChart = new Chart(userRoleCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Admin', 'Staff', 'Customer'],
+                    datasets: [{
+                        label: 'Số lượng',
+                        data: [
+                            /*[[${adminCount ?: 0}]]*/ 0,
+                            /*[[${staffCount ?: 0}]]*/ 0,
+                            /*[[${customerCount ?: 0}]]*/ 0
+                        ],
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb'],
+                        borderColor: ['#5a6fd8', '#6a4190', '#e081e9'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Booking Status Chart
+            const bookingStatusCtx = document.getElementById('bookingStatusChart').getContext('2d');
+            bookingStatusChart = new Chart(bookingStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Confirmed', 'Pending', 'Cancelled', 'Completed'],
+                    datasets: [{
+                        data: [
+                            /*[[${confirmedBookings ?: 0}]]*/ 0,
+                            /*[[${pendingBookings ?: 0}]]*/ 0,
+                            /*[[${cancelledBookings ?: 0}]]*/ 0,
+                            /*[[${completedBookings ?: 0}]]*/ 0
+                        ],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Real-time updates
+        function startRealtimeUpdates() {
+            setInterval(updateRealtimeData, 30000); // Update every 30 seconds
+        }
+        
+        function updateRealtimeData() {
+            fetch('/admin/api/statistics/realtime')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        console.error('Server error:', data.error);
+                        showNotification('Có lỗi khi cập nhật dữ liệu: ' + data.error, 'warning');
+                        return;
+                    }
+                    
+                    // Update stat cards
+                    const statCards = document.querySelectorAll('.stat-card h3');
+                    if (statCards.length >= 4) {
+                        statCards[0].textContent = data.totalUsers || 0;
+                        statCards[1].textContent = data.totalTours || 0;
+                        statCards[2].textContent = data.totalBookings || 0;
+                        
+                        // Format revenue
+                        const revenue = data.todayRevenue || 0;
+                        statCards[3].textContent = new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                        }).format(revenue);
+                    }
+                    
+                    // Update pending bookings
+                    const pendingElement = document.querySelector('.stat-card:nth-child(3) small span');
+                    if (pendingElement) {
+                        pendingElement.textContent = data.pendingBookings || 0;
+                    }
+                    
+                    // Update realtime indicator
+                    const indicator = document.querySelector('.realtime-indicator');
+                    if (indicator) {
+                        indicator.style.animation = 'none';
+                        setTimeout(() => {
+                            indicator.style.animation = 'pulse 2s infinite';
+                        }, 100);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating realtime data:', error);
+                    showNotification('Không thể cập nhật dữ liệu thời gian thực', 'error');
+                });
+        }
+        
+        function showNotification(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toast.innerHTML = `
+                <div class="toast show" role="alert">
+                    <div class="toast-header">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle text-danger' : type === 'warning' ? 'exclamation-triangle text-warning' : 'info-circle text-info'} me-2"></i>
+                        <strong class="me-auto">Thông báo</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 5000);
+        }
+        
+        function updateChart(period) {
+            // Update chart based on selected period
+            fetch(`/admin/api/statistics/chart?period=${period}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        console.error('Server error:', data.error);
+                        showNotification('Có lỗi khi cập nhật biểu đồ: ' + data.error, 'warning');
+                        return;
+                    }
+                    
+                    // Update revenue chart
+                    if (data.revenueByMonth && revenueChart) {
+                        const labels = data.revenueByMonth.map(item => item[0] + '/' + item[1]);
+                        const values = data.revenueByMonth.map(item => item[2] || 0);
+                        
+                        revenueChart.data.labels = labels;
+                        revenueChart.data.datasets[0].data = values;
+                        revenueChart.update();
+                    }
+                    
+                    // Update other charts if needed
+                    if (data.revenueByPaymentMethod && paymentMethodChart) {
+                        const methods = data.revenueByPaymentMethod.map(item => item[0]);
+                        const amounts = data.revenueByPaymentMethod.map(item => item[1] || 0);
+                        
+                        paymentMethodChart.data.labels = methods;
+                        paymentMethodChart.data.datasets[0].data = amounts;
+                        paymentMethodChart.update();
+                    }
+                    
+                    showNotification('Biểu đồ đã được cập nhật', 'info');
+                })
+                .catch(error => {
+                    console.error('Error updating chart:', error);
+                    showNotification('Không thể cập nhật biểu đồ', 'error');
+                });
+        }
+        
+        function refreshData() {
+            showNotification('Đang làm mới dữ liệu...', 'info');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+        
+        function refreshTopTours() {
+            // Refresh top tours table
+            fetch('/admin/api/statistics/realtime')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        showNotification('Có lỗi khi làm mới: ' + data.error, 'warning');
+                        return;
+                    }
+                    
+                    showNotification('Dữ liệu đã được làm mới!', 'info');
+                })
+                .catch(error => {
+                    console.error('Error refreshing top tours:', error);
+                    showNotification('Không thể làm mới dữ liệu', 'error');
+                });
+        }
+        
+        function exportData() {
+            // Create CSV export
+            const data = [
+                ['Loại thống kê', 'Giá trị'],
+                ['Tổng người dùng', /*[[${totalUsers ?: 0}]]*/ 0],
+                ['Tổng tours', /*[[${totalTours ?: 0}]]*/ 0],
+                ['Tổng bookings', /*[[${totalBookings ?: 0}]]*/ 0],
+                ['Admin', /*[[${adminCount ?: 0}]]*/ 0],
+                ['Staff', /*[[${staffCount ?: 0}]]*/ 0],
+                ['Customer', /*[[${customerCount ?: 0}]]*/ 0],
+                ['Confirmed Bookings', /*[[${confirmedBookings ?: 0}]]*/ 0],
+                ['Pending Bookings', /*[[${pendingBookings ?: 0}]]*/ 0],
+                ['Cancelled Bookings', /*[[${cancelledBookings ?: 0}]]*/ 0],
+                ['Completed Bookings', /*[[${completedBookings ?: 0}]]*/ 0]
+            ];
+            
+            const csvContent = data.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `statistics_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html> 

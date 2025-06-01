@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng - Travel Web Admin</title>
+    <title>Quản lý Tours - Travel Web Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -23,15 +23,26 @@
             background: rgba(255,255,255,0.2);
             color: white;
         }
-        .role-badge {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 12px;
+        .tour-image {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
         }
         .status-badge {
             font-size: 0.75rem;
             padding: 4px 8px;
             border-radius: 12px;
+        }
+        .status-active { background: #28a745; color: white; }
+        .status-inactive { background: #6c757d; color: white; }
+        .status-draft { background: #ffc107; color: #000; }
+        .featured-badge {
+            background: #dc3545;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 8px;
         }
     </style>
 </head>
@@ -117,17 +128,17 @@
                     <!-- Header -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h2><i class="fas fa-users me-2"></i>Quản lý người dùng</h2>
+                            <h2><i class="fas fa-map-marked-alt me-2"></i>Quản lý Tours</h2>
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                                    <li class="breadcrumb-item active">Người dùng</li>
+                                    <li class="breadcrumb-item active">Tours</li>
                                 </ol>
                             </nav>
                         </div>
                         <div sec:authorize="hasRole('ADMIN')">
-                            <a href="/admin/users/new" class="btn btn-primary">
-                                <i class="fas fa-plus me-2"></i>Thêm người dùng mới
+                            <a href="/admin/tours/new" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Thêm tour mới
                             </a>
                         </div>
                     </div>
@@ -148,19 +159,27 @@
                     <!-- Search and Filter -->
                     <div class="card mb-4">
                         <div class="card-body">
-                            <form method="get" action="/admin/users">
+                            <form method="get" action="/admin/tours">
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" name="search" 
-                                               th:value="${search}" placeholder="Tìm kiếm theo tên...">
-                                    </div>
                                     <div class="col-md-4">
-                                        <select class="form-select" name="role">
-                                            <option value="">Tất cả vai trò</option>
-                                            <option th:each="role : ${roles}" 
-                                                    th:value="${role}" 
-                                                    th:text="${role}"
-                                                    th:selected="${role.toString() == selectedRole}"></option>
+                                        <input type="text" class="form-control" name="search" 
+                                               th:value="${search}" placeholder="Tìm kiếm theo tên tour...">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" name="categoryId">
+                                            <option value="">Tất cả danh mục</option>
+                                            <option th:each="category : ${categories}" 
+                                                    th:value="${category.categoryId}" 
+                                                    th:text="${category.categoryName}"
+                                                    th:selected="${category.categoryId == selectedCategoryId}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" name="status">
+                                            <option value="">Tất cả trạng thái</option>
+                                            <option value="ACTIVE" th:selected="${selectedStatus == 'ACTIVE'}">Hoạt động</option>
+                                            <option value="INACTIVE" th:selected="${selectedStatus == 'INACTIVE'}">Không hoạt động</option>
+                                            <option value="DRAFT" th:selected="${selectedStatus == 'DRAFT'}">Nháp</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
@@ -173,89 +192,85 @@
                         </div>
                     </div>
 
-                    <!-- Users Table -->
+                    <!-- Tours Table -->
                     <div class="card">
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead class="table-dark">
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Tên đăng nhập</th>
-                                            <th>Họ tên</th>
-                                            <th>Email</th>
-                                            <th>Vai trò</th>
+                                            <th>Hình ảnh</th>
+                                            <th>Tên Tour</th>
+                                            <th>Danh mục</th>
+                                            <th>Điểm đến</th>
+                                            <th>Giá</th>
+                                            <th>Thời gian</th>
                                             <th>Trạng thái</th>
-                                            <th>Ngày tạo</th>
                                             <th>Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="user : ${users}">
-                                            <td th:text="${user.userId}">1</td>
-                                            <td th:text="${user.username}">username</td>
-                                            <td th:text="${user.fullName}">Full Name</td>
-                                            <td th:text="${user.email}">email@example.com</td>
+                                        <tr th:each="tour : ${tours}">
                                             <td>
-                                                <span class="role-badge" 
-                                                      th:classappend="${user.role.name() == 'ADMIN'} ? 'bg-danger text-white' : 
-                                                                     (${user.role.name() == 'STAFF'} ? 'bg-warning text-dark' : 'bg-success text-white')"
-                                                      th:text="${user.role.name()}">ROLE</span>
+                                                <img th:src="${tour.mainImageUrl ?: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=80&h=60&fit=crop'}" 
+                                                     class="tour-image" alt="Tour Image">
                                             </td>
+                                            <td>
+                                                <div class="fw-bold" th:text="${tour.tourName}">Tour Name</div>
+                                                <small class="text-muted" th:text="${tour.tourCode}">TOUR001</small>
+                                                <div th:if="${tour.featured}" class="mt-1">
+                                                    <span class="featured-badge">Nổi bật</span>
+                                                </div>
+                                            </td>
+                                            <td th:text="${tour.category?.categoryName ?: 'N/A'}">Category</td>
+                                            <td th:text="${tour.destination?.destinationName ?: 'N/A'}">Destination</td>
+                                            <td>
+                                                <div class="fw-bold text-primary" th:text="${#numbers.formatCurrency(tour.price)}">Price</div>
+                                                <small class="text-muted" th:if="${tour.discountPercentage > 0}" 
+                                                       th:text="'Giảm ' + ${tour.discountPercentage} + '%'">Discount</small>
+                                            </td>
+                                            <td th:text="${tour.durationDays} + ' ngày'">Duration</td>
                                             <td>
                                                 <span class="status-badge" 
-                                                      th:classappend="${user.status.name() == 'ACTIVE'} ? 'bg-success text-white' : 
-                                                                     (${user.status.name() == 'INACTIVE'} ? 'bg-secondary text-white' : 'bg-danger text-white')"
-                                                      th:text="${user.status.name()}">STATUS</span>
+                                                      th:classappend="${tour.status?.name() == 'ACTIVE'} ? 'status-active' : 
+                                                                     (${tour.status?.name() == 'INACTIVE'} ? 'status-inactive' : 'status-draft')"
+                                                      th:text="${tour.status?.name() ?: 'DRAFT'}">STATUS</span>
                                             </td>
-                                            <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy') : 'N/A'}">01/01/2024</td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a th:href="@{/admin/users/{id}(id=${user.userId})}" 
-                                                       class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                                                    <a th:href="@{'/tours/' + ${tour.tourId}}" 
+                                                       class="btn btn-sm btn-outline-info" title="Xem trước" target="_blank">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <div sec:authorize="hasRole('ADMIN')">
-                                                        <a th:href="@{/admin/users/{id}/edit(id=${user.userId})}" 
+                                                        <a th:href="@{/admin/tours/{id}/edit(id=${tour.tourId})}" 
                                                            class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                         <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                                title="Xóa người dùng" data-bs-toggle="modal" 
-                                                                th:data-bs-target="'#deleteModal' + ${user.userId}">
+                                                                title="Xóa" data-bs-toggle="modal" 
+                                                                th:data-bs-target="'#deleteModal' + ${tour.tourId}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </div>
                                                 </div>
                                                 
                                                 <!-- Delete Modal -->
-                                                <div class="modal fade" th:id="'deleteModal' + ${user.userId}" tabindex="-1">
+                                                <div class="modal fade" th:id="'deleteModal' + ${tour.tourId}" tabindex="-1">
                                                     <div class="modal-dialog">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title">Xác nhận xóa người dùng</h5>
+                                                                <h5 class="modal-title">Xác nhận xóa</h5>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <p>Bạn có chắc chắn muốn xóa người dùng "<span th:text="${user.fullName}"></span>"?</p>
-                                                                <p class="text-danger"><small><strong>Cảnh báo:</strong> Hành động này sẽ xóa hoàn toàn tài khoản và tất cả dữ liệu liên quan khỏi hệ thống. Không thể hoàn tác!</small></p>
-                                                                <div class="alert alert-warning">
-                                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                                    <strong>Dữ liệu sẽ bị xóa:</strong>
-                                                                    <ul class="mb-0 mt-2">
-                                                                        <li>Thông tin tài khoản</li>
-                                                                        <li>Lịch sử đặt tour</li>
-                                                                        <li>Lịch sử thanh toán</li>
-                                                                        <li>Tất cả dữ liệu cá nhân</li>
-                                                                    </ul>
-                                                                </div>
+                                                                <p>Bạn có chắc chắn muốn xóa tour "<span th:text="${tour.tourName}"></span>"?</p>
+                                                                <p class="text-danger"><small>Hành động này không thể hoàn tác!</small></p>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                                                <form th:action="@{/admin/users/{id}/delete(id=${user.userId})}" method="post" style="display: inline;">
-                                                                    <button type="submit" class="btn btn-danger">
-                                                                        <i class="fas fa-trash"></i> Xóa vĩnh viễn
-                                                                    </button>
+                                                                <form th:action="@{/admin/tours/{id}/delete(id=${tour.tourId})}" method="post" style="display: inline;">
+                                                                    <button type="submit" class="btn btn-danger">Xóa</button>
                                                                 </form>
                                                             </div>
                                                         </div>
@@ -267,12 +282,12 @@
                                 </table>
                             </div>
                             
-                            <div th:if="${#lists.isEmpty(users)}" class="text-center py-4">
-                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">Không tìm thấy người dùng nào</p>
+                            <div th:if="${#lists.isEmpty(tours)}" class="text-center py-4">
+                                <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Không tìm thấy tour nào</p>
                                 <div sec:authorize="hasRole('ADMIN')">
-                                    <a href="/admin/users/new" class="btn btn-primary">
-                                        <i class="fas fa-plus me-2"></i>Thêm người dùng đầu tiên
+                                    <a href="/admin/tours/new" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Thêm tour đầu tiên
                                     </a>
                                 </div>
                             </div>

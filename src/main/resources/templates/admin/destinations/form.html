@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${destination.destinationId != null ? 'Chỉnh sửa điểm đến' : 'Thêm điểm đến mới'} + ' - Travel Web Admin'">Form điểm đến - Travel Web Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .form-section {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .section-title {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .required {
+            color: #dc3545;
+        }
+        .image-preview {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>
+                            Admin Panel
+                        </h4>
+                        <small class="text-light opacity-75">Travel Web Management</small>
+                    </div>
+                    
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="fas fa-users me-2"></i>
+                                Quản lý người dùng
+                            </a>
+                        </div>
+                        
+                        <a class="nav-link" href="/admin/tours">
+                            <i class="fas fa-map-marked-alt me-2"></i>
+                            Quản lý Tours
+                        </a>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/categories">
+                                <i class="fas fa-tags me-2"></i>
+                                Danh mục
+                            </a>
+                        </div>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/destinations">
+                                <i class="fas fa-globe-asia me-2"></i>
+                                Điểm đến
+                            </a>
+                        </div>
+                        
+                        <a class="nav-link" href="/admin/bookings">
+                            <i class="fas fa-calendar-check me-2"></i>
+                            Đặt tour
+                        </a>
+                        
+                        <a class="nav-link" href="/admin/payments">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Thanh toán
+                        </a>
+                        
+                        <a class="nav-link" href="/admin/statistics">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Thống kê
+                        </a>
+                        
+                        <hr class="my-3">
+                        
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-2"></i>
+                            Về trang chủ
+                        </a>
+                        
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Đăng xuất
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2>
+                                <i class="fas fa-globe-asia me-2"></i>
+                                <span th:text="${destination.destinationId != null ? 'Chỉnh sửa điểm đến' : 'Thêm điểm đến mới'}">Form điểm đến</span>
+                            </h2>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="/admin/destinations">Điểm đến</a></li>
+                                    <li class="breadcrumb-item active" th:text="${destination.destinationId != null ? 'Chỉnh sửa' : 'Thêm mới'}">Form</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Alert Messages -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Destination Form -->
+                    <div class="form-card">
+                        <form th:action="@{/admin/destinations/save}" method="post" th:object="${destination}">
+                            <input type="hidden" th:field="*{destinationId}">
+                            
+                            <!-- Thông tin cơ bản -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Thông tin cơ bản
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="destinationName" class="form-label">
+                                            Tên điểm đến <span class="required">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="destinationName" th:field="*{destinationName}" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="country" class="form-label">
+                                            Quốc gia <span class="required">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="country" th:field="*{country}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="city" class="form-label">
+                                            Thành phố <span class="required">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="city" th:field="*{city}" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="region" class="form-label">Khu vực</label>
+                                        <input type="text" class="form-control" id="region" th:field="*{region}">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">
+                                        Mô tả <span class="required">*</span>
+                                    </label>
+                                    <textarea class="form-control" id="description" th:field="*{description}" 
+                                              rows="4" required></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Thông tin địa lý -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    Thông tin địa lý
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="latitude" class="form-label">Vĩ độ</label>
+                                        <input type="number" class="form-control" id="latitude" th:field="*{latitude}" 
+                                               step="0.000001" min="-90" max="90">
+                                        <div class="form-text">Ví dụ: 10.762622</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="longitude" class="form-label">Kinh độ</label>
+                                        <input type="number" class="form-control" id="longitude" th:field="*{longitude}" 
+                                               step="0.000001" min="-180" max="180">
+                                        <div class="form-text">Ví dụ: 106.660172</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="timezone" class="form-label">Múi giờ</label>
+                                        <select class="form-select" id="timezone" th:field="*{timezone}">
+                                            <option value="">Chọn múi giờ</option>
+                                            <option value="UTC+7">UTC+7 (Việt Nam)</option>
+                                            <option value="UTC+8">UTC+8 (Trung Quốc, Singapore)</option>
+                                            <option value="UTC+9">UTC+9 (Nhật Bản, Hàn Quốc)</option>
+                                            <option value="UTC+1">UTC+1 (Châu Âu Trung)</option>
+                                            <option value="UTC-5">UTC-5 (Đông Mỹ)</option>
+                                            <option value="UTC-8">UTC-8 (Tây Mỹ)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="climate" class="form-label">Khí hậu</label>
+                                        <select class="form-select" id="climate" th:field="*{climate}">
+                                            <option value="">Chọn loại khí hậu</option>
+                                            <option value="Tropical">Nhiệt đới</option>
+                                            <option value="Subtropical">Cận nhiệt đới</option>
+                                            <option value="Temperate">Ôn đới</option>
+                                            <option value="Continental">Lục địa</option>
+                                            <option value="Mediterranean">Địa Trung Hải</option>
+                                            <option value="Desert">Sa mạc</option>
+                                            <option value="Polar">Cực địa</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hình ảnh và trạng thái -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-image me-2"></i>
+                                    Hình ảnh và trạng thái
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="imageUrl" class="form-label">URL hình ảnh</label>
+                                        <input type="url" class="form-control" id="imageUrl" th:field="*{imageUrl}">
+                                        <div class="form-text">Nhập URL hình ảnh từ internet</div>
+                                        <img th:if="${destination.imageUrl}" th:src="${destination.imageUrl}" 
+                                             class="image-preview" alt="Preview">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="status" class="form-label">
+                                            Trạng thái <span class="required">*</span>
+                                        </label>
+                                        <select class="form-select" id="status" th:field="*{status}" required>
+                                            <option value="">Chọn trạng thái</option>
+                                            <option value="true">Hoạt động</option>
+                                            <option value="false">Không hoạt động</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Thông tin bổ sung -->
+                            <div class="form-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    Thông tin bổ sung
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="bestTimeToVisit" class="form-label">Thời gian tốt nhất để thăm</label>
+                                        <input type="text" class="form-control" id="bestTimeToVisit" th:field="*{bestTimeToVisit}"
+                                               placeholder="Ví dụ: Tháng 11 - Tháng 3">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="language" class="form-label">Ngôn ngữ chính</label>
+                                        <input type="text" class="form-control" id="language" th:field="*{language}"
+                                               placeholder="Ví dụ: Tiếng Việt">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="currency" class="form-label">Đơn vị tiền tệ</label>
+                                        <input type="text" class="form-control" id="currency" th:field="*{currency}"
+                                               placeholder="Ví dụ: VND">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="averageTemperature" class="form-label">Nhiệt độ trung bình (°C)</label>
+                                        <input type="number" class="form-control" id="averageTemperature" 
+                                               th:field="*{averageTemperature}" step="0.1">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="attractions" class="form-label">Điểm tham quan nổi bật</label>
+                                    <textarea class="form-control" id="attractions" th:field="*{attractions}" 
+                                              rows="3" placeholder="Liệt kê các điểm tham quan nổi bật, cách nhau bằng dấu phẩy"></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="travelTips" class="form-label">Lời khuyên du lịch</label>
+                                    <textarea class="form-control" id="travelTips" th:field="*{travelTips}" 
+                                              rows="3" placeholder="Những lời khuyên hữu ích cho du khách"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a href="/admin/destinations" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>
+                                    <span th:text="${destination.destinationId != null ? 'Cập nhật' : 'Tạo mới'}">Lưu</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Preview image when URL changes
+        document.getElementById('imageUrl').addEventListener('input', function() {
+            const url = this.value;
+            let preview = document.querySelector('.image-preview');
+            
+            if (url) {
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.className = 'image-preview';
+                    preview.alt = 'Preview';
+                    this.parentNode.appendChild(preview);
+                }
+                preview.src = url;
+                preview.style.display = 'block';
+            } else if (preview) {
+                preview.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -42,7 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         logger.info("User found: {}, role: {}, status: {}", username, user.getRole(), user.getStatus());
         logger.info("Password hash: {}", user.getPasswordHash());
-        
+
         return new CustomUserPrincipal(user);
     }
 

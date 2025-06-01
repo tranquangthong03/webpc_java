@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Statistics API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Test Statistics API Endpoints</h1>
+    
+    <div class="test-section">
+        <h3>Test Realtime Statistics API</h3>
+        <button onclick="testRealtimeStats()">Test /admin/api/statistics/realtime</button>
+        <div id="realtime-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Chart Data API</h3>
+        <button onclick="testChartData()">Test /admin/api/statistics/chart</button>
+        <div id="chart-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Statistics Page</h3>
+        <button onclick="testStatisticsPage()">Test /admin/statistics</button>
+        <div id="page-result" class="result"></div>
+    </div>
+
+    <script>
+        async function testRealtimeStats() {
+            const resultDiv = document.getElementById('realtime-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('/admin/api/statistics/realtime');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>Success!</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>Error ${response.status}</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>Network Error</h4>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        async function testChartData() {
+            const resultDiv = document.getElementById('chart-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('/admin/api/statistics/chart?period=month');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>Success!</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>Error ${response.status}</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>Network Error</h4>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        async function testStatisticsPage() {
+            const resultDiv = document.getElementById('page-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('/admin/statistics');
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>Success!</h4>
+                        <p>Statistics page loaded successfully (Status: ${response.status})</p>
+                        <p>Content-Type: ${response.headers.get('content-type')}</p>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>Error ${response.status}</h4>
+                        <p>Failed to load statistics page</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>Network Error</h4>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        // Auto test on page load
+        window.onload = function() {
+            console.log('Testing statistics endpoints...');
+            setTimeout(testRealtimeStats, 1000);
+            setTimeout(testChartData, 2000);
+            setTimeout(testStatisticsPage, 3000);
+        };
+    </script>
+</body>
+</html> 

@@ -2,6 +2,7 @@ package com.example.travelweb.service;
 
 import com.example.travelweb.dto.UserRegistrationDto;
 import com.example.travelweb.entity.User;
+import com.example.travelweb.entity.Booking;
 import com.example.travelweb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,9 @@ public class UserService {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private BookingService bookingService;
     
     // Lấy tất cả users
     public List<User> getAllUsers() {
@@ -83,6 +87,24 @@ public class UserService {
         return userRepository.save(user);
     }
     
+    // Tạo user mới với mật khẩu (cho admin)
+    public User createUser(User user, String password) {
+        // Kiểm tra username và email đã tồn tại
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("Username đã tồn tại: " + user.getUsername());
+        }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại: " + user.getEmail());
+        }
+        
+        // Mã hóa mật khẩu
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        
+        return userRepository.save(user);
+    }
+    
     // Cập nhật user (overload method)
     public User updateUser(User user) {
         return userRepository.save(user);
@@ -137,6 +159,16 @@ public class UserService {
         return true;
     }
     
+    // Reset mật khẩu (cho admin)
+    public void resetPassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với ID: " + userId));
+        
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+    
     // Thay đổi role user
     public User changeUserRole(Long id, User.Role role) {
         User user = userRepository.findById(id)
@@ -164,12 +196,30 @@ public class UserService {
         userRepository.save(user);
     }
     
-    // Xóa user
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy user với ID: " + id);
+    // Xóa user và tất cả dữ liệu liên quan
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với ID: " + userId));
+        
+        // Kiểm tra không cho phép xóa admin cuối cùng
+        if (user.getRole() == User.Role.ADMIN) {
+            long adminCount = userRepository.countByRole(User.Role.ADMIN);
+            if (adminCount <= 1) {
+                throw new RuntimeException("Không thể xóa admin cuối cùng trong hệ thống!");
+            }
         }
-        userRepository.deleteById(id);
+        
+        // Kiểm tra user có đang có booking active không
+        // Nếu có booking đang pending hoặc confirmed, không cho phép xóa
+        boolean hasActiveBookings = bookingService.hasActiveBookings(userId);
+        
+        if (hasActiveBookings) {
+            throw new RuntimeException("Không thể xóa user vì còn có booking đang hoạt động. Vui lòng hủy tất cả booking trước khi xóa.");
+        }
+        
+        // Xóa user (cascade sẽ tự động xóa các dữ liệu liên quan)
+        userRepository.deleteById(userId);
     }
     
     // Lấy users theo role

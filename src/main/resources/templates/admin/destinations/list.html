@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng - Travel Web Admin</title>
+    <title>Quản lý Điểm đến - Travel Web Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -23,16 +23,19 @@
             background: rgba(255,255,255,0.2);
             color: white;
         }
-        .role-badge {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 12px;
+        .destination-image {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
         }
         .status-badge {
             font-size: 0.75rem;
             padding: 4px 8px;
             border-radius: 12px;
         }
+        .status-active { background: #28a745; color: white; }
+        .status-inactive { background: #6c757d; color: white; }
     </style>
 </head>
 <body>
@@ -75,7 +78,7 @@
                         </div>
                         
                         <div sec:authorize="hasRole('ADMIN')">
-                            <a class="nav-link" href="/admin/destinations">
+                            <a class="nav-link active" href="/admin/destinations">
                                 <i class="fas fa-globe-asia me-2"></i>
                                 Điểm đến
                             </a>
@@ -117,17 +120,17 @@
                     <!-- Header -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h2><i class="fas fa-users me-2"></i>Quản lý người dùng</h2>
+                            <h2><i class="fas fa-globe-asia me-2"></i>Quản lý Điểm đến</h2>
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                                    <li class="breadcrumb-item active">Người dùng</li>
+                                    <li class="breadcrumb-item active">Điểm đến</li>
                                 </ol>
                             </nav>
                         </div>
                         <div sec:authorize="hasRole('ADMIN')">
-                            <a href="/admin/users/new" class="btn btn-primary">
-                                <i class="fas fa-plus me-2"></i>Thêm người dùng mới
+                            <a href="/admin/destinations/new" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Thêm điểm đến mới
                             </a>
                         </div>
                     </div>
@@ -148,19 +151,26 @@
                     <!-- Search and Filter -->
                     <div class="card mb-4">
                         <div class="card-body">
-                            <form method="get" action="/admin/users">
+                            <form method="get" action="/admin/destinations">
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" name="search" 
-                                               th:value="${search}" placeholder="Tìm kiếm theo tên...">
-                                    </div>
                                     <div class="col-md-4">
-                                        <select class="form-select" name="role">
-                                            <option value="">Tất cả vai trò</option>
-                                            <option th:each="role : ${roles}" 
-                                                    th:value="${role}" 
-                                                    th:text="${role}"
-                                                    th:selected="${role.toString() == selectedRole}"></option>
+                                        <input type="text" class="form-control" name="search" 
+                                               th:value="${search}" placeholder="Tìm kiếm theo tên điểm đến...">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" name="country">
+                                            <option value="">Tất cả quốc gia</option>
+                                            <option th:each="country : ${countries}" 
+                                                    th:value="${country}" 
+                                                    th:text="${country}"
+                                                    th:selected="${country == selectedCountry}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" name="status">
+                                            <option value="">Tất cả trạng thái</option>
+                                            <option value="ACTIVE" th:selected="${selectedStatus == 'ACTIVE'}">Hoạt động</option>
+                                            <option value="INACTIVE" th:selected="${selectedStatus == 'INACTIVE'}">Không hoạt động</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
@@ -173,89 +183,79 @@
                         </div>
                     </div>
 
-                    <!-- Users Table -->
+                    <!-- Destinations Table -->
                     <div class="card">
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead class="table-dark">
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Tên đăng nhập</th>
-                                            <th>Họ tên</th>
-                                            <th>Email</th>
-                                            <th>Vai trò</th>
+                                            <th>Hình ảnh</th>
+                                            <th>Tên điểm đến</th>
+                                            <th>Quốc gia</th>
+                                            <th>Thành phố</th>
+                                            <th>Số tours</th>
                                             <th>Trạng thái</th>
-                                            <th>Ngày tạo</th>
                                             <th>Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="user : ${users}">
-                                            <td th:text="${user.userId}">1</td>
-                                            <td th:text="${user.username}">username</td>
-                                            <td th:text="${user.fullName}">Full Name</td>
-                                            <td th:text="${user.email}">email@example.com</td>
+                                        <tr th:each="destination : ${destinations}">
                                             <td>
-                                                <span class="role-badge" 
-                                                      th:classappend="${user.role.name() == 'ADMIN'} ? 'bg-danger text-white' : 
-                                                                     (${user.role.name() == 'STAFF'} ? 'bg-warning text-dark' : 'bg-success text-white')"
-                                                      th:text="${user.role.name()}">ROLE</span>
+                                                <img th:src="${destination.imageUrl ?: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=60&fit=crop'}" 
+                                                     class="destination-image" alt="Destination Image">
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold" th:text="${destination.destinationName}">Destination Name</div>
+                                                <small class="text-muted" th:text="${#strings.abbreviate(destination.description, 50)}">Description</small>
+                                            </td>
+                                            <td th:text="${destination.country}">Country</td>
+                                            <td th:text="${destination.city}">City</td>
+                                            <td>
+                                                <span class="badge bg-info" th:text="${destination.tours?.size() ?: 0}">0</span>
                                             </td>
                                             <td>
                                                 <span class="status-badge" 
-                                                      th:classappend="${user.status.name() == 'ACTIVE'} ? 'bg-success text-white' : 
-                                                                     (${user.status.name() == 'INACTIVE'} ? 'bg-secondary text-white' : 'bg-danger text-white')"
-                                                      th:text="${user.status.name()}">STATUS</span>
+                                                      th:classappend="${destination.status == true} ? 'status-active' : 'status-inactive'"
+                                                      th:text="${destination.status == true ? 'Hoạt động' : 'Không hoạt động'}">STATUS</span>
                                             </td>
-                                            <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy') : 'N/A'}">01/01/2024</td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a th:href="@{/admin/users/{id}(id=${user.userId})}" 
-                                                       class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                                                    <a th:href="@{'/tours?destinationId=' + ${destination.destinationId}}" 
+                                                       class="btn btn-sm btn-outline-info" title="Xem tours" target="_blank">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <div sec:authorize="hasRole('ADMIN')">
-                                                        <a th:href="@{/admin/users/{id}/edit(id=${user.userId})}" 
+                                                        <a th:href="@{/admin/destinations/{id}/edit(id=${destination.destinationId})}" 
                                                            class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                         <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                                title="Xóa người dùng" data-bs-toggle="modal" 
-                                                                th:data-bs-target="'#deleteModal' + ${user.userId}">
+                                                                title="Xóa" data-bs-toggle="modal" 
+                                                                th:data-bs-target="'#deleteModal' + ${destination.destinationId}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </div>
                                                 </div>
                                                 
                                                 <!-- Delete Modal -->
-                                                <div class="modal fade" th:id="'deleteModal' + ${user.userId}" tabindex="-1">
+                                                <div class="modal fade" th:id="'deleteModal' + ${destination.destinationId}" tabindex="-1">
                                                     <div class="modal-dialog">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title">Xác nhận xóa người dùng</h5>
+                                                                <h5 class="modal-title">Xác nhận xóa</h5>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <p>Bạn có chắc chắn muốn xóa người dùng "<span th:text="${user.fullName}"></span>"?</p>
-                                                                <p class="text-danger"><small><strong>Cảnh báo:</strong> Hành động này sẽ xóa hoàn toàn tài khoản và tất cả dữ liệu liên quan khỏi hệ thống. Không thể hoàn tác!</small></p>
-                                                                <div class="alert alert-warning">
-                                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                                    <strong>Dữ liệu sẽ bị xóa:</strong>
-                                                                    <ul class="mb-0 mt-2">
-                                                                        <li>Thông tin tài khoản</li>
-                                                                        <li>Lịch sử đặt tour</li>
-                                                                        <li>Lịch sử thanh toán</li>
-                                                                        <li>Tất cả dữ liệu cá nhân</li>
-                                                                    </ul>
-                                                                </div>
+                                                                <p>Bạn có chắc chắn muốn xóa điểm đến "<span th:text="${destination.destinationName}"></span>"?</p>
+                                                                <p class="text-danger" th:if="${destination.tours?.size() > 0}">
+                                                                    <small><strong>Cảnh báo:</strong> Điểm đến này có <span th:text="${destination.tours?.size()}">0</span> tour(s) liên quan!</small>
+                                                                </p>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                                                <form th:action="@{/admin/users/{id}/delete(id=${user.userId})}" method="post" style="display: inline;">
-                                                                    <button type="submit" class="btn btn-danger">
-                                                                        <i class="fas fa-trash"></i> Xóa vĩnh viễn
-                                                                    </button>
+                                                                <form th:action="@{/admin/destinations/{id}/delete(id=${destination.destinationId})}" method="post" style="display: inline;">
+                                                                    <button type="submit" class="btn btn-danger">Xóa</button>
                                                                 </form>
                                                             </div>
                                                         </div>
@@ -267,12 +267,12 @@
                                 </table>
                             </div>
                             
-                            <div th:if="${#lists.isEmpty(users)}" class="text-center py-4">
-                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">Không tìm thấy người dùng nào</p>
+                            <div th:if="${#lists.isEmpty(destinations)}" class="text-center py-4">
+                                <i class="fas fa-globe-asia fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Không tìm thấy điểm đến nào</p>
                                 <div sec:authorize="hasRole('ADMIN')">
-                                    <a href="/admin/users/new" class="btn btn-primary">
-                                        <i class="fas fa-plus me-2"></i>Thêm người dùng đầu tiên
+                                    <a href="/admin/destinations/new" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Thêm điểm đến đầu tiên
                                     </a>
                                 </div>
                             </div>

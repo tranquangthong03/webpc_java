@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Danh mục - Travel Web Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>
+                            Admin Panel
+                        </h4>
+                        <small class="text-light opacity-75">Travel Web Management</small>
+                    </div>
+                    
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="fas fa-users me-2"></i>
+                                Quản lý người dùng
+                            </a>
+                        </div>
+                        
+                        <a class="nav-link" href="/admin/tours">
+                            <i class="fas fa-map-marked-alt me-2"></i>
+                            Quản lý Tours
+                        </a>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link active" href="/admin/categories">
+                                <i class="fas fa-tags me-2"></i>
+                                Danh mục
+                            </a>
+                        </div>
+                        
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a class="nav-link" href="/admin/destinations">
+                                <i class="fas fa-globe-asia me-2"></i>
+                                Điểm đến
+                            </a>
+                        </div>
+                        
+                        <a class="nav-link" href="/admin/bookings">
+                            <i class="fas fa-calendar-check me-2"></i>
+                            Đặt tour
+                        </a>
+                        
+                        <a class="nav-link" href="/admin/payments">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Thanh toán
+                        </a>
+                        
+                        <a class="nav-link" href="/admin/statistics">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Thống kê
+                        </a>
+                        
+                        <hr class="my-3">
+                        
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-2"></i>
+                            Về trang chủ
+                        </a>
+                        
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Đăng xuất
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2><i class="fas fa-tags me-2"></i>Quản lý Danh mục</h2>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                                    <li class="breadcrumb-item active">Danh mục</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a href="/admin/categories/new" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Thêm danh mục mới
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Alert Messages -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Categories Grid -->
+                    <div class="row">
+                        <div th:each="category : ${categories}" class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="category-icon me-3" 
+                                             th:style="'background: linear-gradient(135deg, ' + ${category.color ?: '#667eea'} + ' 0%, ' + ${category.color ?: '#764ba2'} + ' 100%);'">
+                                            <i th:class="${category.icon ?: 'fas fa-tag'}"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title mb-1" th:text="${category.categoryName}">Category Name</h5>
+                                            <small class="text-muted" th:text="${category.tours?.size() ?: 0} + ' tours'">5 tours</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="card-text text-muted" th:text="${category.description}">Category description</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="btn-group" role="group">
+                                            <a th:href="@{'/tours?categoryId=' + ${category.categoryId}}" 
+                                               class="btn btn-sm btn-outline-info" title="Xem tours" target="_blank">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <div sec:authorize="hasRole('ADMIN')">
+                                                <a th:href="@{/admin/categories/{id}/edit(id=${category.categoryId})}" 
+                                                   class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                        title="Xóa" data-bs-toggle="modal" 
+                                                        th:data-bs-target="'#deleteModal' + ${category.categoryId}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-primary" th:text="${category.tours?.size() ?: 0}">0</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Delete Modal -->
+                                <div class="modal fade" th:id="'deleteModal' + ${category.categoryId}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Xác nhận xóa</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Bạn có chắc chắn muốn xóa danh mục "<span th:text="${category.categoryName}"></span>"?</p>
+                                                <p class="text-danger" th:if="${category.tours?.size() > 0}">
+                                                    <small><strong>Cảnh báo:</strong> Danh mục này có <span th:text="${category.tours?.size()}">0</span> tour(s) liên quan!</small>
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                <form th:action="@{/admin/categories/{id}/delete(id=${category.categoryId})}" method="post" style="display: inline;">
+                                                    <button type="submit" class="btn btn-danger">Xóa</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${#lists.isEmpty(categories)}" class="text-center py-5">
+                        <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Chưa có danh mục nào</h4>
+                        <p class="text-muted">Hãy tạo danh mục đầu tiên để phân loại các tour du lịch</p>
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a href="/admin/categories/new" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Thêm danh mục đầu tiên
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

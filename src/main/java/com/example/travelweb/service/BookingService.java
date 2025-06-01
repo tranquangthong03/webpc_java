@@ -10,6 +10,7 @@ import com.example.travelweb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -233,6 +234,16 @@ public class BookingService {
         return bookingRepository.getRevenueByMonth();
     }
     
+    // Lấy doanh thu theo tháng với status
+    public List<Object[]> getRevenueByMonth(Booking.BookingStatus status) {
+        return bookingRepository.getRevenueByMonth(status);
+    }
+    
+    // Lấy doanh thu theo tháng với booking và payment status
+    public List<Object[]> getRevenueByMonth(Booking.BookingStatus bookingStatus, Booking.PaymentStatus paymentStatus) {
+        return bookingRepository.getRevenueByMonth(bookingStatus, paymentStatus);
+    }
+    
     // Thống kê booking theo status
     public long countBookingsByStatus(Booking.BookingStatus status) {
         return bookingRepository.countByBookingStatus(status);
@@ -241,6 +252,42 @@ public class BookingService {
     // Thống kê booking theo user
     public long countBookingsByUser(Long userId) {
         return bookingRepository.countByUserUserId(userId);
+    }
+    
+    // Lấy tổng doanh thu
+    public Double getTotalRevenue() {
+        return bookingRepository.getTotalRevenue(Booking.BookingStatus.CONFIRMED, Booking.PaymentStatus.PAID);
+    }
+    
+    // Lấy tổng doanh thu với status
+    public Double getTotalRevenue(Booking.BookingStatus bookingStatus, Booking.PaymentStatus paymentStatus) {
+        return bookingRepository.getTotalRevenue(bookingStatus, paymentStatus);
+    }
+    
+    // Thống kê booking theo ngày
+    public List<Object[]> getBookingStatsByDay(Booking.BookingStatus status, LocalDateTime startDate, LocalDateTime endDate) {
+        return bookingRepository.getBookingStatsByDay(status, startDate, endDate);
+    }
+    
+    // Thống kê booking theo tuần
+    public List<Object[]> getBookingStatsByWeek(Booking.BookingStatus status, LocalDateTime startDate, LocalDateTime endDate) {
+        return bookingRepository.getBookingStatsByWeek(status, startDate, endDate);
+    }
+    
+    // Thống kê booking theo tháng với status
+    public List<Object[]> getBookingStatsByMonth(Booking.BookingStatus status) {
+        return bookingRepository.getBookingStatsByMonth(status);
+    }
+    
+    // Lấy top tours theo số booking
+    public List<Object[]> getTopToursByBookingCount(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return bookingRepository.getTopToursByBookingCount(Booking.BookingStatus.CONFIRMED, pageable);
+    }
+    
+    // Thống kê booking theo payment status
+    public List<Object[]> getBookingStatsByPaymentStatus() {
+        return bookingRepository.getBookingStatsByPaymentStatus();
     }
     
     // Private helper methods
@@ -287,5 +334,13 @@ public class BookingService {
         booking.getParticipants().add(participant);
         
         return bookingRepository.save(booking);
+    }
+    
+    // Kiểm tra user có booking đang hoạt động không
+    public boolean hasActiveBookings(Long userId) {
+        List<Booking> userBookings = bookingRepository.findByUserUserIdOrderByBookingDateDesc(userId);
+        return userBookings.stream()
+                .anyMatch(booking -> booking.getBookingStatus() == Booking.BookingStatus.PENDING || 
+                                   booking.getBookingStatus() == Booking.BookingStatus.CONFIRMED);
     }
 }
