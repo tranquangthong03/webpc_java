@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,19 +19,30 @@ import java.util.List;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
+
     @Autowired
     private UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        logger.info("Attempting to authenticate user: {}", username);
+        
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user với username: " + username));
+                .orElseThrow(() -> {
+                    logger.warn("User not found: {}", username);
+                    return new UsernameNotFoundException("Không tìm thấy user với username: " + username);
+                });
 
         // Kiểm tra trạng thái user
         if (user.getStatus() != User.Status.ACTIVE) {
+            logger.warn("User account is not active: {}, status: {}", username, user.getStatus());
             throw new UsernameNotFoundException("Tài khoản đã bị khóa hoặc không hoạt động");
         }
-
+        
+        logger.info("User found: {}, role: {}, status: {}", username, user.getRole(), user.getStatus());
+        logger.info("Password hash: {}", user.getPasswordHash());
+        
         return new CustomUserPrincipal(user);
     }
 

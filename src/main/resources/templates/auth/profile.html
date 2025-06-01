@@ -176,7 +176,7 @@
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">Giới tính</div>
-                                        <div class="info-value" th:text="${user.gender != null ? (user.gender == 'MALE' ? 'Nam' : (user.gender == 'FEMALE' ? 'Nữ' : 'Khác')) : 'Chưa cập nhật'}">Chưa cập nhật</div>
+                                        <div class="info-value" th:text="${user.gender != null ? (user.gender == 'Male' ? 'Nam' : (user.gender == 'Female' ? 'Nữ' : 'Khác')) : 'Chưa cập nhật'}">Chưa cập nhật</div>
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">Địa chỉ</div>
@@ -212,9 +212,9 @@
                                             <label for="gender" class="form-label">Giới tính</label>
                                             <select class="form-control" id="gender" th:field="*{gender}">
                                                 <option value="">Chọn giới tính</option>
-                                                <option value="MALE">Nam</option>
-                                                <option value="FEMALE">Nữ</option>
-                                                <option value="OTHER">Khác</option>
+                                                <option value="Male">Nam</option>
+                                                <option value="Female">Nữ</option>
+                                                <option value="Other">Khác</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">

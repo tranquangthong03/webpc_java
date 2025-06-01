@@ -3,6 +3,7 @@ package com.example.travelweb.controller;
 import com.example.travelweb.dto.UserRegistrationDto;
 import com.example.travelweb.entity.User;
 import com.example.travelweb.service.UserService;
+import com.example.travelweb.service.PasswordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,13 +14,21 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private PasswordService passwordService;
 
     // Hiển thị trang đăng nhập
     @GetMapping("/login")
@@ -28,6 +37,22 @@ public class AuthController {
                                Model model) {
         if (error != null) {
             model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
+            
+            // Debug: Kiểm tra user trong database
+            logger.info("Login error occurred - checking database for admin user");
+            User adminUser = userService.findByUsername("admin");
+            if (adminUser != null) {
+                logger.info("Admin user found: {}", adminUser.getUsername());
+                logger.info("Admin status: {}", adminUser.getStatus());
+                logger.info("Admin role: {}", adminUser.getRole());
+                logger.info("Password hash length: {}", adminUser.getPasswordHash().length());
+                
+                // Thử kiểm tra mật khẩu "admin123" với hash hiện tại
+                boolean matches = passwordService.matches("admin123", adminUser.getPasswordHash());
+                logger.info("Password 'admin123' matches stored hash: {}", matches);
+            } else {
+                logger.warn("Admin user not found in database!");
+            }
         }
         if (logout != null) {
             model.addAttribute("message", "Đăng xuất thành công!");
@@ -51,6 +76,13 @@ public class AuthController {
         
         // Kiểm tra validation errors
         if (result.hasErrors()) {
+            model.addAttribute("error", "Vui lòng kiểm tra và điền đầy đủ thông tin bắt buộc!");
+            return "auth/register";
+        }
+
+        // Kiểm tra mật khẩu xác nhận
+        if (!registrationDto.getPassword().equals(registrationDto.getConfirmPassword())) {
+            model.addAttribute("error", "Mật khẩu xác nhận không khớp!");
             return "auth/register";
         }
 
@@ -66,20 +98,18 @@ public class AuthController {
             return "auth/register";
         }
 
-        // Kiểm tra mật khẩu xác nhận
-        if (!registrationDto.getPassword().equals(registrationDto.getConfirmPassword())) {
-            model.addAttribute("error", "Mật khẩu xác nhận không khớp!");
-            return "auth/register";
-        }
-
         try {
             // Tạo user mới
             User user = userService.createUser(registrationDto);
+            logger.info("User registered successfully: {}", user.getUsername());
+            logger.info("Password hash: {}", user.getPasswordHash());
+            
             redirectAttributes.addFlashAttribute("success", 
                 "Đăng ký thành công! Vui lòng đăng nhập.");
             return "redirect:/auth/login";
         } catch (Exception e) {
-            model.addAttribute("error", "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại!");
+            logger.error("Error during registration", e);
+            model.addAttribute("error", "Có lỗi xảy ra khi đăng ký: " + e.getMessage());
             return "auth/register";
         }
     }
@@ -94,6 +124,7 @@ public class AuthController {
             if (user != null) {
                 // Cập nhật last login
                 userService.updateLastLogin(user.getUserId());
+                logger.info("User logged in successfully: {}", username);
                 
                 // Redirect theo role
                 if (user.getRole() == User.Role.ADMIN) {
@@ -173,5 +204,55 @@ public class AuthController {
         }
 
         return "redirect:/auth/profile";
+    }
+    
+    // Endpoint để reset mật khẩu admin (chỉ dùng cho development)
+    @GetMapping("/reset-admin")
+    @ResponseBody
+    public String resetAdminPassword() {
+        try {
+            User adminUser = userService.findByUsername("admin");
+            if (adminUser != null) {
+                // Đặt mật khẩu mới là "admin123"
+                String newPasswordHash = passwordService.encode("admin123");
+                adminUser.setPasswordHash(newPasswordHash);
+                adminUser.setStatus(User.Status.ACTIVE);
+                userService.updateUser(adminUser);
+                
+                return "Admin password reset successfully. New password: admin123";
+            } else {
+                return "Admin user not found!";
+            }
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    // Endpoint để tạo tài khoản admin mới nếu không tồn tại
+    @GetMapping("/create-admin")
+    @ResponseBody
+    public String createAdminAccount() {
+        try {
+            User adminUser = userService.findByUsername("admin");
+            if (adminUser == null) {
+                // Tạo tài khoản admin mới
+                User newAdmin = new User();
+                newAdmin.setUsername("admin");
+                newAdmin.setEmail("admin@example.com");
+                newAdmin.setPasswordHash(passwordService.encode("admin123"));
+                newAdmin.setFullName("Administrator");
+                newAdmin.setRole(User.Role.ADMIN);
+                newAdmin.setStatus(User.Status.ACTIVE);
+                newAdmin.setCreatedAt(LocalDateTime.now());
+                
+                userService.createUser(newAdmin);
+                return "Admin account created successfully. Username: admin, Password: admin123";
+            } else {
+                return "Admin account already exists!";
+            }
+        } catch (Exception e) {
+            logger.error("Error creating admin account", e);
+            return "Error: " + e.getMessage();
+        }
     }
 } 

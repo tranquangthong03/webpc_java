@@ -53,4 +53,20 @@ public class HomeController {
         model.addAttribute("title", "Liên hệ");
         return "contact";
     }
+    
+    // Redirect mappings for old paths
+    @GetMapping("/login")
+    public String redirectToLogin() {
+        return "redirect:/auth/login";
+    }
+    
+    @GetMapping("/register")
+    public String redirectToRegister() {
+        return "redirect:/auth/register";
+    }
+    
+    @GetMapping("/test-security")
+    public String testSecurity() {
+        return "test-security";
+    }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,12 +60,39 @@
                             <i class="fas fa-search"></i>
                         </button>
                     </form>
-                    <a href="/login" class="btn btn-outline-light me-2">
-                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
-                    </a>
-                    <a href="/register" class="btn btn-light">
-                        <i class="fas fa-user-plus"></i> Đăng ký
-                    </a>
+                    
+                    <!-- Hiển thị khi chưa đăng nhập -->
+                    <div sec:authorize="!isAuthenticated()">
+                        <a href="/auth/login" class="btn btn-outline-light me-2">
+                            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                        </a>
+                        <a href="/auth/register" class="btn btn-light">
+                            <i class="fas fa-user-plus"></i> Đăng ký
+                        </a>
+                    </div>
+                    
+                    <!-- Hiển thị khi đã đăng nhập -->
+                    <div sec:authorize="isAuthenticated()" class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i> <span sec:authentication="name">Username</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="/auth/profile">
+                                <i class="fas fa-user-circle"></i> Thông tin cá nhân
+                            </a></li>
+                            <li><a class="dropdown-item" href="/user/bookings">
+                                <i class="fas fa-calendar-check"></i> Đặt tour của tôi
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/auth/logout}" method="post" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

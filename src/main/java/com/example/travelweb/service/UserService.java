@@ -61,8 +61,8 @@ public class UserService {
         user.setPhone(registrationDto.getPhone());
         user.setAddress(registrationDto.getAddress());
         user.setDateOfBirth(registrationDto.getDateOfBirth());
-        user.setGender(registrationDto.getGender() != null ? 
-            User.Gender.valueOf(registrationDto.getGender().toUpperCase()) : null);
+        user.setGender(registrationDto.getGender() != null && !registrationDto.getGender().isEmpty() ? 
+            User.Gender.valueOf(registrationDto.getGender()) : null);
         user.setRole(User.Role.CUSTOMER); // Mặc định là customer
         user.setStatus(User.Status.ACTIVE);
         user.setCreatedAt(LocalDateTime.now());

@@ -47,6 +47,7 @@ public class SecurityConfig {
                 // ==================== PUBLIC ENDPOINTS ====================
                 // Trang chủ và thông tin công khai
                 .requestMatchers("/", "/home", "/about", "/contact").permitAll()
+                .requestMatchers("/test-security").permitAll() // Test page
                 
                 // Xem tours và destinations (không cần đăng nhập)
                 .requestMatchers("/tours", "/tours/*/view", "/tours/search").permitAll()
@@ -117,7 +118,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/logout")
+                .logoutUrl("/auth/logout")
                 .logoutSuccessUrl("/auth/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
