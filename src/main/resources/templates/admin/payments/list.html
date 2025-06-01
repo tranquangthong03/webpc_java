@@ -232,7 +232,7 @@
                                                             th:if="${payment.paymentStatus.name() == 'PENDING'}" 
                                                             type="button" class="btn btn-sm btn-outline-success" 
                                                             title="Xác nhận thanh toán" 
-                                                            onclick="confirmPayment([[${payment.paymentId}]])">
+                                                            th:onclick="'confirmPayment(' + ${payment.paymentId} + ')'">
                                                         <i class="fas fa-check"></i>
                                                     </button>
                                                 </div>
@@ -314,27 +314,29 @@
         </div>
     </div>
 
+    <div th:replace="fragments/footer :: adminFooter"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function confirmPayment(paymentId) {
-            const response = prompt('Nhập phản hồi xác nhận thanh toán:');
+            var response = prompt('Nhập phản hồi xác nhận thanh toán:');
             if (response !== null && response.trim() !== '') {
-                fetch(`/admin/payments/${paymentId}/confirm`, {
+                fetch('/admin/payments/' + paymentId + '/confirm', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    body: `response=${encodeURIComponent(response)}`
+                    body: 'response=' + encodeURIComponent(response)
                 })
-                .then(response => response.text())
-                .then(data => {
+                .then(function(response) { return response.text(); })
+                .then(function(data) {
                     if (data === 'success') {
                         location.reload();
                     } else {
                         alert('Có lỗi xảy ra: ' + data);
                     }
                 })
-                .catch(error => {
+                .catch(function(error) {
                     alert('Có lỗi xảy ra: ' + error);
                 });
             }

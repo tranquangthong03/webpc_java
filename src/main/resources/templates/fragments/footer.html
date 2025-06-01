@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>    
+    <!-- Modern Colorful Footer -->
+    <footer th:fragment="modern-footer" class="prestige-footer">
+        <div class="container footer-content-wrapper">
+            <div class="row">
+                <!-- About Column -->
+                <div class="col-lg-3 col-md-6 footer-column">
+                    <div class="footer-logo">
+                        <i class="fas fa-globe-asia me-2"></i>Travel Web
+                    </div>
+                    <p class="footer-description">
+                        Khám phá thế giới cùng chúng tôi - Nơi khởi đầu cho những hành trình tuyệt vời và những kỷ niệm không thể quên.
+                    </p>
+                    <div class="social-icons">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Điều hướng Column -->
+                <div class="col-lg-3 col-md-6 footer-column">
+                    <div class="footer-title">Điều hướng</div>
+                    <ul class="list-unstyled footer-nav">
+                        <li><a th:href="@{/tours}">Tất cả Tours</a></li>
+                        <li><a th:href="@{/tours/featured}">Tours nổi bật</a></li>
+                        <li><a th:href="@{/tours/discount}">Khuyến mãi</a></li>
+                        <li><a th:href="@{/about}">Về chúng tôi</a></li>
+                        <li><a th:href="@{/contact}">Liên hệ</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Hỗ trợ Column -->
+                <div class="col-lg-3 col-md-6 footer-column">
+                    <div class="footer-title">Giờ làm việc</div>
+                    <div class="working-hours">
+                        <div class="day">
+                            <span>Thứ Hai - Thứ Sáu:</span>
+                            <span>8:00 - 20:00</span>
+                        </div>
+                        <div class="day">
+                            <span>Thứ Bảy - Chủ nhật:</span>
+                            <span>9:00 - 18:00</span>
+                        </div>
+                        <div class="day">
+                            <span>Các ngày lễ:</span>
+                            <span>10:00 - 16:00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-title mt-4">Phương thức thanh toán</div>
+                    <div class="payment-methods">
+                        <i class="fab fa-cc-visa payment-icon"></i>
+                        <i class="fab fa-cc-mastercard payment-icon"></i>
+                        <i class="fab fa-cc-paypal payment-icon"></i>
+                        <i class="fab fa-cc-jcb payment-icon"></i>
+                    </div>
+                </div>
+                
+                <!-- Contact Column -->
+                <div class="col-lg-3 col-md-6 footer-column">
+                    <div class="footer-title">Thông tin liên hệ</div>
+                    <div class="footer-contact">
+                        <i class="fas fa-map-marker-alt"></i>
+                        123 Đường Nguyễn Huệ, Quận 1, TP.HCM
+                    </div>
+                    <div class="footer-contact">
+                        <i class="fas fa-phone-alt"></i>
+                        (028) 1234 5678
+                    </div>
+                    <div class="footer-contact">
+                        <i class="fas fa-envelope"></i>
+                        info@travelweb.com
+                    </div>
+                    <div class="footer-contact">
+                        <i class="fas fa-headset"></i>
+                        Hỗ trợ: support@travelweb.com
+                    </div>
+                    <div class="footer-contact">
+                        <i class="fas fa-clock"></i>
+                        8:00 - 22:00 (Hàng ngày)
+                    </div>
+                    
+                    <div class="footer-title mt-4">Đăng ký nhận tin</div>
+                    <form class="newsletter-form">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Email của bạn">
+                            <button class="btn btn-cta" type="submit">Gửi</button>
+                        </div>
+                    </form>
+                    
+                    <div class="app-download-badges mt-3">
+                        <a href="#" class="me-2">
+                            <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Google Play" style="height: 35px; width: auto;" />
+                        </a>
+                        <a href="#">
+                            <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="App Store" style="height: 35px; width: auto;" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        &copy; <span th:text="${#dates.year(#dates.createNow())}">2025</span> Travel Web. Designed with <i class="fas fa-heart text-danger"></i> by You. All Rights Reserved.
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <a href="#">Điều khoản sử dụng</a>
+                        <span class="mx-1">|</span>
+                        <a href="#">Chính sách bảo mật</a>
+                        <span class="mx-1">|</span>
+                        <a href="#">Sitemap</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Admin Footer (remains unchanged) -->
+    <div th:fragment="adminFooter">
+        <footer class="footer-admin mt-5 py-3">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
+                        <span class="fw-bold text-white h5">
+                            <i class="fas fa-globe-asia me-2"></i>Travel Web Admin
+                        </span>
+                    </div>
+                    <div class="col-12 col-md-6 text-center text-md-end">
+                        <a href="https://facebook.com" target="_blank" class="footer-icon mx-1" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://zalo.me" target="_blank" class="footer-icon mx-1" title="Zalo"><i class="fab fa-telegram-plane"></i></a>
+                        <a href="mailto:support@travelweb.com" class="footer-icon mx-1" title="Email"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12 text-center">
+                        <small class="text-light opacity-75">&copy; <span th:text="${#dates.year(#dates.createNow())}">2025</span> Travel Web. All rights reserved.</small>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,422 @@
+/* Modern Colorful Footer Styles */
+.prestige-footer {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #a18cd1 100%);
+    color: rgba(255, 255, 255, 0.95);
+    margin-top: 60px;
+    padding: 50px 0 30px 0;
+    border-top: 4px solid #ffd700;
+    font-size: 0.95rem;
+    overflow: hidden;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Decorative top border with gradient */
+.prestige-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ffd700, #ffb347, #ff6b6b, #4ecdc4, #45b7d1);
+    z-index: 1;
+}
+
+/* Clean footer design with colorful accents */
+.prestige-footer .footer-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 20px 0;
+}
+
+.prestige-footer .footer-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.prestige-footer .footer-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background: #ffd700;
+    border-radius: 2px;
+}
+
+.prestige-footer a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.prestige-footer a:hover {
+    color: #ffd700;
+    text-decoration: none;
+    transform: translateX(5px);
+}
+
+.prestige-footer .footer-contact {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.prestige-footer .footer-contact i {
+    width: 20px;
+    color: #ffd700;
+    margin-right: 12px;
+}
+
+.prestige-footer .footer-bottom {
+    padding-top: 25px;
+    margin-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}        
+
+.prestige-footer .footer-content-wrapper {
+    position: relative;
+    z-index: 2;
+}
+
+/* Colorful footer columns with subtle cards */
+.footer-column {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.footer-column:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Footer navigation links */
+.prestige-footer .footer-nav li {
+    margin-bottom: 12px;
+}
+
+.prestige-footer .footer-nav a {
+    padding: 5px 0;
+    display: inline-block;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.prestige-footer .footer-nav a:hover {
+    color: #ffd700;
+    padding-left: 8px;
+}
+
+/* Colorful social media icons */
+.prestige-footer .social-icons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.prestige-footer .social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 1.1rem;
+    transition: all 0.4s ease;
+    border: 2px solid transparent;
+}
+
+.prestige-footer .social-icons a:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}
+
+.prestige-footer .social-icons a[title="Facebook"]:hover {
+    background: #3b5998;
+    border-color: #4267B2;
+}
+
+.prestige-footer .social-icons a[title="Instagram"]:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    border-color: #E4405F;
+}
+
+.prestige-footer .social-icons a[title="Twitter"]:hover {
+    background: #1da1f2;
+    border-color: #1DA1F2;
+}
+
+.prestige-footer .social-icons a[title="YouTube"]:hover {
+    background: #ff0000;
+    border-color: #FF0000;
+}
+
+.prestige-footer .social-icons a[title="LinkedIn"]:hover {
+    background: #0077b5;
+    border-color: #0077B5;
+}
+
+/* Logo styling with gradient text */
+.prestige-footer .footer-logo {
+    font-weight: bold;
+    font-size: 1.5rem;
+    background: linear-gradient(45deg, #ffd700, #ffb347);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+.prestige-footer .footer-logo i {
+    color: #ffd700;
+    -webkit-text-fill-color: #ffd700;
+}
+
+/* Footer description */
+.prestige-footer .footer-description {
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}        
+
+/* Colorful payment methods */
+.payment-methods {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.payment-methods .payment-icon {
+    color: #ffd700;
+    font-size: 1.8rem;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.payment-methods .payment-icon:hover {
+    color: #ffffff;
+    background: #ffd700;
+    transform: scale(1.1);
+}
+
+/* Working hours with better styling */
+.working-hours {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.working-hours .day {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dotted rgba(255, 215, 0, 0.3);
+}
+
+.working-hours .day:last-child {
+    border-bottom: none;
+}
+
+/* Newsletter subscription form with colorful styling */
+.newsletter-form {
+    margin-top: 15px;
+}
+
+.newsletter-form .form-control {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    border-radius: 8px 0 0 8px;
+    padding: 10px 15px;
+}
+
+.newsletter-form .form-control:focus {
+    border-color: #ffd700;
+    box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25);
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.newsletter-form .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.newsletter-form .btn-cta {
+    background: linear-gradient(45deg, #ffd700, #ffb347);
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 0 8px 8px 0;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.newsletter-form .btn-cta:hover {
+    background: linear-gradient(45deg, #ffb347, #ff8c00);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.newsletter-form .input-group {
+    display: flex;
+}
+
+.newsletter-form .form-control {
+    flex: 1;
+}
+
+/* Clean footer bottom section with gradient */
+.prestige-footer .footer-bottom a {
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0 10px;
+    transition: color 0.3s ease;
+}
+
+.prestige-footer .footer-bottom a:hover {
+    color: #ffd700;
+}
+
+/* App download badges */
+.app-download-badges {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.app-download-badges img {
+    height: 35px;
+    transition: transform 0.3s ease;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px;
+}
+
+.app-download-badges img:hover {
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* Responsive styles */
+@media (max-width: 767.98px) {
+    .prestige-footer .footer-bottom .text-md-end {
+        text-align: center !important;
+        margin-top: 15px;
+    }
+    
+    .prestige-footer .footer-logo {
+        text-align: center;
+        display: block;
+    }
+    
+    .prestige-footer .social-icons {
+        justify-content: center;
+    }
+    
+    .footer-column {
+        margin-bottom: 25px;
+        padding: 15px;
+    }
+}        
+
+/* Admin Footer Styles (Colorful) */
+.footer-admin {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-top: 3px solid #ffd700;
+    margin-top: 30px;
+    padding: 25px 0;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.footer-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin: 0 5px;
+    border: 2px solid transparent;
+}
+
+.footer-icon:hover {
+    background: #ffd700;
+    color: #333;
+    text-decoration: none;
+    transform: translateY(-3px);
+    border-color: #ffb347;
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}        
+
+/* Additional responsive adjustments */
+@media (max-width: 767.98px) {
+    .prestige-footer {
+        padding: 40px 0 20px 0;
+        text-align: center;
+    }
+    
+    .prestige-footer .footer-title {
+        margin-top: 20px;
+    }
+    
+    .prestige-footer .footer-nav a {
+        padding: 5px 0;
+    }
+    
+    .prestige-footer .footer-contact {
+        justify-content: center;
+    }
+}
+
+/* List styles */
+.list-inline {
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0;
+    list-style: none;
+    margin: 0;
+}
+
+.list-inline-item {
+    margin-right: 10px;
+}
+
+/* List with icons */
+.list-icon li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.list-icon i {
+    margin-right: 10px;
+    margin-top: 4px;
+} 

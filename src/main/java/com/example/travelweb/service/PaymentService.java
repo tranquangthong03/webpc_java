@@ -5,8 +5,6 @@ import com.example.travelweb.entity.Booking;
 import com.example.travelweb.repository.PaymentRepository;
 import com.example.travelweb.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,11 +45,6 @@ public class PaymentService {
     // Lấy payments theo booking
     public List<Payment> getPaymentsByBooking(Long bookingId) {
         return paymentRepository.findByBookingBookingIdOrderByPaymentDateDesc(bookingId);
-    }
-    
-    // Lấy payments thành công theo booking
-    public List<Payment> getSuccessfulPaymentsByBooking(Long bookingId) {
-        return paymentRepository.findSuccessfulPaymentsByBooking(bookingId, Payment.PaymentStatus.SUCCESS);
     }
     
     // Lấy payments theo payment method
@@ -194,9 +187,9 @@ public class PaymentService {
         return savedRefund;
     }
     
-    // Tính số tiền đã thanh toán cho booking
+    // Tính tổng số tiền đã thanh toán cho booking
     public BigDecimal getTotalPaidAmount(Long bookingId) {
-        List<Payment> successPayments = paymentRepository.findSuccessfulPaymentsByBooking(bookingId, Payment.PaymentStatus.SUCCESS);
+        List<Payment> successPayments = paymentRepository.findSuccessfulPaymentsByBooking(bookingId);
         return successPayments.stream()
                 .map(Payment::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -227,19 +220,9 @@ public class PaymentService {
         return paymentRepository.findSuccessfulPaymentsInDateRange(startDate, endDate);
     }
     
-    // Lấy payments thành công trong khoảng thời gian với status
-    public List<Payment> getSuccessfulPaymentsInDateRange(LocalDateTime startDate, LocalDateTime endDate, Payment.PaymentStatus status) {
-        return paymentRepository.findSuccessfulPaymentsInDateRange(startDate, endDate, status);
-    }
-    
     // Thống kê doanh thu theo phương thức thanh toán
     public List<Object[]> getRevenueByPaymentMethod() {
         return paymentRepository.getRevenueByPaymentMethod();
-    }
-    
-    // Thống kê doanh thu theo phương thức thanh toán với status
-    public List<Object[]> getRevenueByPaymentMethod(Payment.PaymentStatus status) {
-        return paymentRepository.getRevenueByPaymentMethod(status);
     }
     
     // Thống kê payment theo status
@@ -250,57 +233,6 @@ public class PaymentService {
     // Thống kê payment theo method
     public long countPaymentsByMethod(Payment.PaymentMethod method) {
         return paymentRepository.countByPaymentMethod(method);
-    }
-    
-    // Lấy tổng doanh thu từ payments thành công
-    public Double getTotalSuccessfulPayments() {
-        return paymentRepository.getTotalSuccessfulPayments();
-    }
-    
-    // Lấy tổng doanh thu từ payments với status
-    public Double getTotalSuccessfulPayments(Payment.PaymentStatus status) {
-        return paymentRepository.getTotalSuccessfulPayments(status);
-    }
-    
-    // Doanh thu theo ngày
-    public List<Object[]> getDailyRevenue(LocalDateTime startDate, LocalDateTime endDate) {
-        return paymentRepository.getDailyRevenue(startDate, endDate);
-    }
-    
-    // Doanh thu theo ngày với status
-    public List<Object[]> getDailyRevenue(Payment.PaymentStatus status, LocalDateTime startDate, LocalDateTime endDate) {
-        return paymentRepository.getDailyRevenue(status, startDate, endDate);
-    }
-    
-    // Thống kê payment theo tháng
-    public List<Object[]> getPaymentStatsByMonth(Payment.PaymentStatus status) {
-        return paymentRepository.getPaymentStatsByMonth(status);
-    }
-    
-    // Thống kê payment theo tuần
-    public List<Object[]> getPaymentStatsByWeek(Payment.PaymentStatus status, LocalDateTime startDate, LocalDateTime endDate) {
-        return paymentRepository.getPaymentStatsByWeek(status, startDate, endDate);
-    }
-    
-    // Thống kê payment theo ngày
-    public List<Object[]> getPaymentStatsByDay(Payment.PaymentStatus status, LocalDateTime startDate, LocalDateTime endDate) {
-        return paymentRepository.getPaymentStatsByDay(status, startDate, endDate);
-    }
-    
-    // Lấy top payment methods
-    public List<Object[]> getTopPaymentMethods(Payment.PaymentStatus status) {
-        return paymentRepository.getTopPaymentMethods(status);
-    }
-    
-    // Lấy payments có amount lớn nhất
-    public List<Payment> getTopPaymentsByAmount(Payment.PaymentStatus status, int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
-        return paymentRepository.findTopPaymentsByAmount(status, pageable);
-    }
-    
-    // Tính tổng refund
-    public Double getTotalRefundAmount(Payment.PaymentStatus status) {
-        return paymentRepository.getTotalRefundAmount(status);
     }
     
     // Private helper methods

@@ -211,9 +211,4 @@ public class TourService {
     public boolean existsByTourCode(String tourCode) {
         return tourRepository.existsByTourCode(tourCode);
     }
-    
-    // Lấy top tours được đặt nhiều nhất
-    public List<Tour> getTopTours() {
-        return tourRepository.findTopBookedTours(PageRequest.of(0, 10));
-    }
 }
