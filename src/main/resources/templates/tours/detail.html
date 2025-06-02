@@ -64,9 +64,11 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary btn-lg" onclick="bookTour()">
+                            <a th:if="${tour != null && tour.schedules != null && !tour.schedules.isEmpty()}"
+                               th:href="@{'/bookings/create?scheduleId=' + ${tour.schedules[0].scheduleId}}"
+                               class="btn btn-primary btn-lg">
                                 <i class="fas fa-calendar-plus"></i> Đặt tour ngay
-                            </button>
+                            </a>
                             <button class="btn btn-outline-primary" onclick="addToWishlist()">
                                 <i class="fas fa-heart"></i> Thêm vào yêu thích
                             </button>
@@ -119,10 +121,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        function bookTour() {
-            alert('Chức năng đặt tour đang được phát triển. Vui lòng liên hệ hotline để đặt tour.');
-        }
-
         function addToWishlist() {
             alert('Chức năng yêu thích đang được phát triển.');
         }

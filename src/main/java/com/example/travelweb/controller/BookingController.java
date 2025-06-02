@@ -12,6 +12,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import com.example.travelweb.entity.User;
+import com.example.travelweb.repository.UserRepository;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -29,6 +34,9 @@ public class BookingController {
     @Autowired
     private TourService tourService;
     
+    @Autowired
+    private UserRepository userRepository;
+    
     // Hiển thị form booking
     @GetMapping("/create")
     public String showBookingForm(@RequestParam Long scheduleId, Model model) {
@@ -43,18 +51,43 @@ public class BookingController {
                                @RequestParam Long scheduleId,
                                @RequestParam int adultCount,
                                @RequestParam int childCount,
+                               @RequestParam(required = false) String customerNotes,
                                RedirectAttributes redirectAttributes) {
         try {
-            // Set schedule
-            booking.getSchedule().setScheduleId(scheduleId);
+            // Lấy thông tin user đang đăng nhập từ SecurityContextHolder
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập để đặt tour");
+                return "redirect:/auth/login";
+            }
+            
+            String username;
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            } else {
+                username = authentication.getName();
+            }
+            
+            // Tìm user theo username hoặc email
+            User user = userRepository.findByUsername(username)
+                .orElseGet(() -> userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người dùng")));
+            
+            // Initialize objects properly
+            TourSchedule schedule = new TourSchedule();
+            schedule.setScheduleId(scheduleId);
+            
+            booking.setSchedule(schedule);
+            booking.setUser(user);
             booking.setAdultCount(adultCount);
             booking.setChildCount(childCount);
+            booking.setCustomerNotes(customerNotes);
             
             // Tạo booking
             Booking savedBooking = bookingService.createBooking(booking);
             
             redirectAttributes.addFlashAttribute("success", "Đặt tour thành công!");
-            return "redirect:/bookings/" + savedBooking.getBookingId();
+            return "redirect:/bookings/my";
             
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
@@ -169,5 +202,34 @@ public class BookingController {
         } catch (Exception e) {
             return "error: " + e.getMessage();
         }
+    }
+    
+    // Hiển thị danh sách tour đã đặt của user
+    @GetMapping("/my")
+    public String myBookings(Model model) {
+        // Lấy thông tin user đang đăng nhập từ SecurityContextHolder
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/auth/login";
+        }
+        
+        String username;
+        if (authentication.getPrincipal() instanceof UserDetails) {
+            username = ((UserDetails) authentication.getPrincipal()).getUsername();
+        } else {
+            username = authentication.getName();
+        }
+        
+        // Tìm user theo username hoặc email
+        User user = userRepository.findByUsername(username)
+            .orElseGet(() -> userRepository.findByEmail(username)
+            .orElse(null));
+            
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        
+        model.addAttribute("bookings", bookingService.getBookingsByUser(user.getUserId()));
+        return "user/my-bookings";
     }
 }

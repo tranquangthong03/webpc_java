@@ -77,7 +77,7 @@ public class UserController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("statuses", Booking.BookingStatus.values());
         
-        return "user/bookings";
+        return "user/my-bookings";
     }
 
     // Xem chi tiết booking
@@ -125,7 +125,7 @@ public class UserController {
             if (!booking.getUser().getUserId().equals(user.getUserId()) && 
                 !user.getRole().equals(User.Role.ADMIN)) {
                 redirectAttributes.addFlashAttribute("error", "Bạn không có quyền hủy booking này!");
-                return "redirect:/user/bookings";
+                return "redirect:/bookings/my";
             }
             
             bookingService.cancelBooking(id, reason);
@@ -134,7 +134,7 @@ public class UserController {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
         }
         
-        return "redirect:/user/bookings";
+        return "redirect:/bookings/my";
     }
 
     // Xem lịch sử thanh toán

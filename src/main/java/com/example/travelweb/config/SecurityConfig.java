@@ -95,11 +95,8 @@ public class SecurityConfig {
                 // Profile management (tất cả user đã đăng nhập)
                 .requestMatchers("/auth/profile", "/auth/change-password").authenticated()
                 
-                // Booking endpoints (chỉ CUSTOMER và ADMIN)
-                .requestMatchers("/bookings/new", "/bookings/create").hasAnyRole("CUSTOMER", "ADMIN")
-                .requestMatchers("/bookings/my-bookings").hasAnyRole("CUSTOMER", "ADMIN")
-                .requestMatchers("/bookings/*/view").authenticated()
-                .requestMatchers("/bookings/*/cancel").hasAnyRole("CUSTOMER", "ADMIN")
+                // Booking endpoints (chỉ user đã đăng nhập)
+                .requestMatchers("/bookings/create", "/bookings/my", "/bookings/my-bookings", "/bookings/**").authenticated()
                 
                 // Payment endpoints (chỉ CUSTOMER và ADMIN)
                 .requestMatchers("/payments/**").hasAnyRole("CUSTOMER", "ADMIN")
