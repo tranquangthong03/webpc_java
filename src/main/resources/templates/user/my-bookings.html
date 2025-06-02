@@ -30,7 +30,14 @@
                     <td th:text="${booking.bookingStatus}"></td>
                     <td th:text="${booking.adultCount + booking.childCount}"></td>
                     <td th:text="${#numbers.formatCurrency(booking.finalAmount)}"></td>
-                    <td><a th:href="@{'/bookings/' + ${booking.bookingId}}" class="btn btn-sm btn-primary">Xem</a></td>
+                    <td>
+                        <a th:href="@{'/user/bookings/' + ${booking.bookingId}}" class="btn btn-primary btn-sm">Xem</a>
+                        <a th:href="@{'/user/bookings/edit/' + ${booking.bookingId}}" class="btn btn-warning btn-sm">Chỉnh sửa</a>
+                        <form th:action="@{'/user/bookings/' + ${booking.bookingId} + '/cancel'}" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy booking này?');">
+                            <input type="hidden" name="reason" value="User cancelled from my bookings page" />
+                            <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
+                        </form>
+                    </td>
                 </tr>
             </tbody>
         </table>

@@ -19,6 +19,7 @@ import com.example.travelweb.entity.User;
 import com.example.travelweb.repository.UserRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -229,7 +230,13 @@ public class BookingController {
             return "redirect:/auth/login";
         }
         
-        model.addAttribute("bookings", bookingService.getBookingsByUser(user.getUserId()));
+        // Chỉ hiển thị các booking chưa bị hủy
+        List<Booking> bookings = bookingService.getBookingsByUser(user.getUserId())
+            .stream()
+            .filter(b -> b.getBookingStatus() != Booking.BookingStatus.CANCELLED)
+            .toList();
+        
+        model.addAttribute("bookings", bookings);
         return "user/my-bookings";
     }
 }

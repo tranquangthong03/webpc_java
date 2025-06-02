@@ -70,7 +70,10 @@ public class UserController {
             Booking.BookingStatus bookingStatus = Booking.BookingStatus.valueOf(status.toUpperCase());
             bookings = bookingService.getBookingsByUserAndStatus(user.getUserId(), bookingStatus);
         } else {
-            bookings = bookingService.getBookingsByUser(user.getUserId());
+            bookings = bookingService.getBookingsByUser(user.getUserId())
+                .stream()
+                .filter(b -> b.getBookingStatus() != Booking.BookingStatus.CANCELLED)
+                .toList();
         }
         
         model.addAttribute("bookings", bookings);
@@ -241,5 +244,48 @@ public class UserController {
         model.addAttribute("message", "Tính năng wishlist sẽ được phát triển trong tương lai");
         
         return "user/wishlist";
+    }
+
+    // Hiển thị form chỉnh sửa booking
+    @GetMapping("/bookings/edit/{id}")
+    public String editBookingForm(@PathVariable Long id, Authentication authentication, Model model) {
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        Booking booking = bookingService.getBookingById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+        if (!booking.getUser().getUserId().equals(user.getUserId()) && !user.getRole().equals(User.Role.ADMIN)) {
+            return "redirect:/auth/access-denied";
+        }
+        model.addAttribute("booking", booking);
+        return "user/edit-booking";
+    }
+
+    // Xử lý cập nhật booking
+    @PostMapping("/bookings/edit/{id}")
+    public String updateBooking(@PathVariable Long id, @ModelAttribute Booking bookingDetails, Authentication authentication, RedirectAttributes redirectAttributes) {
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        Booking booking = bookingService.getBookingById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+        if (!booking.getUser().getUserId().equals(user.getUserId()) && !user.getRole().equals(User.Role.ADMIN)) {
+            return "redirect:/auth/access-denied";
+        }
+        try {
+            // Chỉ cho phép cập nhật số lượng người lớn, trẻ em, ghi chú khách hàng
+            booking.setAdultCount(bookingDetails.getAdultCount());
+            booking.setChildCount(bookingDetails.getChildCount());
+            booking.setCustomerNotes(bookingDetails.getCustomerNotes());
+            bookingService.updateBooking(id, bookingDetails);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật booking thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+        }
+        return "redirect:/bookings/my";
     }
 } 
