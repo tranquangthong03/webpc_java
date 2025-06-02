@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -86,6 +87,7 @@ public class SecurityConfig {
                                "/admin/bookings/*/view").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/admin/bookings/*/confirm").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/admin/bookings/*/cancel").hasRole("ADMIN")
+                .requestMatchers("/admin/bookings/*/delete").hasRole("ADMIN")
                 
                 // Quản lý payments (ADMIN + STAFF có thể xem, ADMIN có thể xác nhận)
                 .requestMatchers("/admin/payments", "/admin/payments/list").hasAnyRole("ADMIN", "STAFF")
@@ -132,6 +134,7 @@ public class SecurityConfig {
             )
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/h2-console/**") // Disable CSRF for H2 console
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Make CSRF token available to JavaScript
             )
             .headers(headers -> headers
                 .frameOptions().sameOrigin() // Allow frames from same origin for H2 console

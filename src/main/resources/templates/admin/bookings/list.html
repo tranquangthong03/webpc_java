@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Quản lý Đặt tour - Travel Web Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -175,6 +177,14 @@
                     <!-- Bookings Table -->
                     <div class="card">
                         <div class="card-body">
+                            <div class="mb-4">
+                                <a href="/admin/bookings" class="btn btn-primary me-2">
+                                    <i class="fas fa-list"></i> Danh sách Booking
+                                </a>
+                                <a href="/admin/bookings/by-user" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-users"></i> Booking theo Người dùng
+                                </a>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead class="table-dark">
@@ -191,51 +201,58 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="booking : ${bookings}">
+                                        <tr th:if="${bookings == null || #lists.isEmpty(bookings)}">
+                                            <td colspan="9" class="text-center">Không có booking nào.</td>
+                                        </tr>
+                                        <tr th:each="booking : ${bookings}" th:if="${bookings != null}">
                                             <td>
                                                 <strong th:text="${booking.bookingCode}">BK001</strong>
                                             </td>
                                             <td>
-                                                <div th:text="${booking.user.fullName}">Customer Name</div>
-                                                <small class="text-muted" th:text="${booking.user.email}">email@example.com</small>
+                                                <div th:text="${booking.user?.fullName}">Customer Name</div>
+                                                <small class="text-muted" th:text="${booking.user?.email}">email@example.com</small>
                                             </td>
                                             <td>
-                                                <div th:text="${booking.schedule.tour.tourName}">Tour Name</div>
+                                                <div th:text="${booking.schedule?.tour?.tourName}">Tour Name</div>
                                                 <small class="text-muted">
-                                                    Khởi hành: <span th:text="${#temporals.format(booking.schedule.startDate, 'dd/MM/yyyy')}">01/01/2024</span>
+                                                    Khởi hành: <span th:text="${booking.schedule != null && booking.schedule.departureDate != null ? #temporals.format(booking.schedule.departureDate, 'dd/MM/yyyy') : ''}">01/01/2024</span>
                                                 </small>
                                             </td>
-                                            <td th:text="${#temporals.format(booking.bookingDate, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</td>
+                                            <td th:text="${booking.bookingDate != null ? #temporals.format(booking.bookingDate, 'dd/MM/yyyy HH:mm') : ''}">01/01/2024 10:00</td>
                                             <td>
-                                                <span th:text="${booking.adultCount + booking.childCount}">2</span> người
+                                                <span th:text="${(booking.adultCount != null ? booking.adultCount : 0) + (booking.childCount != null ? booking.childCount : 0)}">2</span> người
                                                 <br>
                                                 <small class="text-muted">
-                                                    (<span th:text="${booking.adultCount}">1</span> NL, <span th:text="${booking.childCount}">1</span> TE)
+                                                    (<span th:text="${booking.adultCount != null ? booking.adultCount : 0}">1</span> NL, <span th:text="${booking.childCount != null ? booking.childCount : 0}">1</span> TE)
                                                 </small>
                                             </td>
                                             <td>
-                                                <div th:text="${#numbers.formatCurrency(booking.finalAmount)}">1,000,000 VNĐ</div>
-                                                <small class="text-muted" th:if="${booking.discountAmount > 0}">
+                                                <div th:text="${booking.finalAmount != null ? #numbers.formatCurrency(booking.finalAmount) : ''}">1,000,000 VNĐ</div>
+                                                <small class="text-muted" th:if="${booking.discountAmount != null && booking.discountAmount > 0}">
                                                     Giảm: <span th:text="${#numbers.formatCurrency(booking.discountAmount)}">100,000 VNĐ</span>
                                                 </small>
                                             </td>
                                             <td>
                                                 <span class="status-badge" 
-                                                      th:classappend="${booking.bookingStatus.name() == 'PENDING'} ? 'status-pending' : 
-                                                                     (${booking.bookingStatus.name() == 'CONFIRMED'} ? 'status-confirmed' : 
-                                                                     (${booking.bookingStatus.name() == 'CANCELLED'} ? 'status-cancelled' : 'status-completed'))"
-                                                      th:text="${booking.bookingStatus.name() == 'PENDING' ? 'Chờ xác nhận' : 
+                                                      th:classappend="${booking.bookingStatus == null ? '' : 
+                                                                     (booking.bookingStatus.name() == 'PENDING' ? 'status-pending' : 
+                                                                     (booking.bookingStatus.name() == 'CONFIRMED' ? 'status-confirmed' : 
+                                                                     (booking.bookingStatus.name() == 'CANCELLED' ? 'status-cancelled' : 'status-completed')))}"
+                                                      th:text="${booking.bookingStatus == null ? 'Unknown' : 
+                                                               (booking.bookingStatus.name() == 'PENDING' ? 'Chờ xác nhận' : 
                                                                (booking.bookingStatus.name() == 'CONFIRMED' ? 'Đã xác nhận' : 
-                                                               (booking.bookingStatus.name() == 'CANCELLED' ? 'Đã hủy' : 'Hoàn thành'))}">STATUS</span>
+                                                               (booking.bookingStatus.name() == 'CANCELLED' ? 'Đã hủy' : 'Hoàn thành')))}">STATUS</span>
                                             </td>
                                             <td>
                                                 <span class="payment-badge" 
-                                                      th:classappend="${booking.paymentStatus.name() == 'UNPAID'} ? 'payment-unpaid' : 
-                                                                     (${booking.paymentStatus.name() == 'PARTIAL'} ? 'payment-partial' : 
-                                                                     (${booking.paymentStatus.name() == 'PAID'} ? 'payment-paid' : 'payment-refunded'))"
-                                                      th:text="${booking.paymentStatus.name() == 'UNPAID' ? 'Chưa thanh toán' : 
+                                                      th:classappend="${booking.paymentStatus == null ? '' :
+                                                                     (booking.paymentStatus.name() == 'UNPAID' ? 'payment-unpaid' : 
+                                                                     (booking.paymentStatus.name() == 'PARTIAL' ? 'payment-partial' : 
+                                                                     (booking.paymentStatus.name() == 'PAID' ? 'payment-paid' : 'payment-refunded')))}"
+                                                      th:text="${booking.paymentStatus == null ? 'Unknown' :
+                                                               (booking.paymentStatus.name() == 'UNPAID' ? 'Chưa thanh toán' : 
                                                                (booking.paymentStatus.name() == 'PARTIAL' ? 'Thanh toán 1 phần' : 
-                                                               (booking.paymentStatus.name() == 'PAID' ? 'Đã thanh toán' : 'Đã hoàn tiền'))}">PAYMENT</span>
+                                                               (booking.paymentStatus.name() == 'PAID' ? 'Đã thanh toán' : 'Đã hoàn tiền')))}">PAYMENT</span>
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
@@ -245,7 +262,7 @@
                                                     </a>
                                                     
                                                     <!-- Confirm button - chỉ hiển thị cho booking PENDING -->
-                                                    <button th:if="${booking.bookingStatus.name() == 'PENDING'}" 
+                                                    <button th:if="${booking.bookingStatus != null && booking.bookingStatus.name() == 'PENDING'}" 
                                                             type="button" class="btn btn-sm btn-outline-success" 
                                                             title="Xác nhận" th:onclick="'confirmBooking(' + ${booking.bookingId} + ')'">
                                                         <i class="fas fa-check"></i>
@@ -253,11 +270,19 @@
                                                     
                                                     <!-- Cancel button - chỉ ADMIN và booking chưa hoàn thành -->
                                                     <button sec:authorize="hasRole('ADMIN')" 
-                                                            th:if="${booking.bookingStatus.name() != 'CANCELLED' && booking.bookingStatus.name() != 'COMPLETED'}" 
+                                                            th:if="${booking.bookingStatus != null && booking.bookingStatus.name() != 'CANCELLED' && booking.bookingStatus.name() != 'COMPLETED'}" 
                                                             type="button" class="btn btn-sm btn-outline-danger" 
                                                             title="Hủy booking" data-bs-toggle="modal" 
                                                             th:data-bs-target="'#cancelModal' + ${booking.bookingId}">
                                                         <i class="fas fa-times"></i>
+                                                    </button>
+                                                    
+                                                    <!-- Delete button - chỉ ADMIN và booking đã hủy -->
+                                                    <button sec:authorize="hasRole('ADMIN')" 
+                                                            th:if="${booking.bookingStatus != null && booking.bookingStatus.name() == 'CANCELLED'}" 
+                                                            type="button" class="btn btn-sm btn-outline-danger" 
+                                                            title="Xóa booking" th:onclick="'deleteBooking(' + ${booking.bookingId} + ')'">
+                                                        <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
                                                 
@@ -308,23 +333,50 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Get CSRF token from cookie
+        // function getCsrfToken() {
+        //     return document.cookie.split('; ')
+        //         .find(row => row.startsWith('XSRF-TOKEN='))
+        //         ?.split('=')[1];
+        // }
+    
         function confirmBooking(bookingId) {
             if (confirm('Bạn có chắc chắn muốn xác nhận booking này?')) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+                
+                console.log('Attempting to confirm booking with ID:', bookingId);
+                
+                const headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                };
+                
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader] = csrfToken;
+                }
+                
                 fetch('/admin/bookings/' + bookingId + '/confirm', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
+                    headers: headers
                 })
-                .then(function(response) { return response.text(); })
-                .then(function(data) {
-                    if (data === 'success') {
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('Server responded with ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.includes('success')) {
+                        alert('Xác nhận booking thành công!');
                         location.reload();
                     } else {
                         alert('Có lỗi xảy ra: ' + data);
                     }
                 })
-                .catch(function(error) {
+                .catch(error => {
+                    console.error('Error:', error);
                     alert('Có lỗi xảy ra: ' + error);
                 });
             }
@@ -337,24 +389,92 @@
                 return;
             }
             
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            
+            console.log('Attempting to cancel booking with ID:', bookingId);
+            
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            };
+            
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+            
             fetch('/admin/bookings/' + bookingId + '/cancel', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
+                headers: headers,
                 body: 'reason=' + encodeURIComponent(reason)
             })
-            .then(function(response) { return response.text(); })
-            .then(function(data) {
-                if (data === 'success') {
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Server responded with ' + response.status);
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.includes('success')) {
+                    alert('Hủy booking thành công!');
                     location.reload();
                 } else {
                     alert('Có lỗi xảy ra: ' + data);
                 }
             })
-            .catch(function(error) {
+            .catch(error => {
+                console.error('Error:', error);
                 alert('Có lỗi xảy ra: ' + error);
             });
+        }
+        
+        function deleteBooking(bookingId) {
+            if (confirm('Bạn có chắc chắn muốn xóa booking này? Hành động này không thể hoàn tác.')) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+                
+                console.log('Attempting to delete booking with ID:', bookingId);
+                
+                const headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                };
+                
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader] = csrfToken;
+                }
+                
+                fetch('/admin/bookings/' + bookingId + '/delete', {
+                    method: 'POST',
+                    headers: headers
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (response.status === 404) {
+                        throw new Error('Không tìm thấy booking hoặc endpoint không tồn tại (404)');
+                    }
+                    if (!response.ok) {
+                        throw new Error('Lỗi máy chủ: ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.includes('success')) {
+                        alert('Xóa booking thành công!');
+                        location.reload();
+                    } else if (data.includes('error')) {
+                        alert('Có lỗi xảy ra: ' + data);
+                    } else {
+                        alert('Xóa booking thành công!');
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra: ' + error);
+                });
+            }
         }
     </script>
 </body>

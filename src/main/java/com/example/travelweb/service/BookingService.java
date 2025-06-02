@@ -1,12 +1,15 @@
 package com.example.travelweb.service;
 
 import com.example.travelweb.entity.Booking;
+import com.example.travelweb.entity.Booking.BookingStatus;
 import com.example.travelweb.entity.TourSchedule;
 import com.example.travelweb.entity.User;
 import com.example.travelweb.entity.BookingParticipant;
+import com.example.travelweb.entity.Payment;
 import com.example.travelweb.repository.BookingRepository;
 import com.example.travelweb.repository.TourScheduleRepository;
 import com.example.travelweb.repository.UserRepository;
+import com.example.travelweb.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 @Service
 @Transactional
@@ -31,6 +35,9 @@ public class BookingService {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private PaymentRepository paymentRepository;
     
     // Lấy tất cả bookings
     public List<Booking> getAllBookings() {
@@ -283,6 +290,21 @@ public class BookingService {
         return bookingRepository.findByUserUserIdAndBookingStatus(userId, status);
     }
     
+    // Lấy tất cả bookings theo user cho admin
+    public List<Object[]> getBookingsByUserForAdmin() {
+        List<User> users = userRepository.findAll();
+        List<Object[]> results = new ArrayList<>();
+        
+        for (User user : users) {
+            List<Booking> userBookings = bookingRepository.findByUserUserIdOrderByBookingDateDesc(user.getUserId());
+            if (!userBookings.isEmpty()) {
+                results.add(new Object[] { user, userBookings });
+            }
+        }
+        
+        return results;
+    }
+    
     // Thêm participant vào booking
     public Booking addParticipant(Long bookingId, BookingParticipant participant) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -292,5 +314,37 @@ public class BookingService {
         booking.getParticipants().add(participant);
         
         return bookingRepository.save(booking);
+    }
+    
+    // Xóa booking
+    @Transactional
+    public void deleteBooking(Long id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking với ID: " + id));
+        
+        // Chỉ cho phép xóa booking đã hủy
+        if (booking.getBookingStatus() != Booking.BookingStatus.CANCELLED) {
+            throw new RuntimeException("Chỉ có thể xóa booking đã hủy");
+        }
+        
+        try {
+            // Get all payments related to this booking
+            List<Payment> payments = paymentRepository.findByBookingBookingIdOrderByPaymentDateDesc(id);
+            
+            // Delete each payment individually first
+            if (!payments.isEmpty()) {
+                for (Payment payment : payments) {
+                    paymentRepository.delete(payment);
+                }
+                // Flush to ensure all payments are deleted
+                paymentRepository.flush();
+            }
+            
+            // Now it's safe to delete the booking
+            bookingRepository.delete(booking);
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi xóa booking: " + e.getMessage(), e);
+        }
     }
 }

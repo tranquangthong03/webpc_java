@@ -4,9 +4,11 @@ import com.example.travelweb.entity.Booking;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,19 +18,30 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     // Tìm booking theo code
-    Optional<Booking> findByBookingCode(String bookingCode);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.user u WHERE b.bookingCode = :bookingCode")
+    Optional<Booking> findByBookingCode(@Param("bookingCode") String bookingCode);
     
     // Tìm booking theo user
-    List<Booking> findByUserUserIdOrderByBookingDateDesc(Long userId);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.user u WHERE b.user.userId = :userId ORDER BY b.bookingDate DESC")
+    List<Booking> findByUserUserIdOrderByBookingDateDesc(@Param("userId") Long userId);
     
     // Tìm booking theo user với phân trang
-    Page<Booking> findByUserUserIdOrderByBookingDateDesc(Long userId, Pageable pageable);
+    @Query(value = "SELECT b FROM Booking b JOIN FETCH b.user u WHERE b.user.userId = :userId ORDER BY b.bookingDate DESC",
+           countQuery = "SELECT COUNT(b) FROM Booking b WHERE b.user.userId = :userId")
+    Page<Booking> findByUserUserIdOrderByBookingDateDesc(@Param("userId") Long userId, Pageable pageable);
     
     // Tìm booking theo status
-    List<Booking> findByBookingStatus(Booking.BookingStatus status);
+    @Query("SELECT DISTINCT b FROM Booking b " +
+           "LEFT JOIN FETCH b.user u " +
+           "LEFT JOIN FETCH b.schedule s " +
+           "LEFT JOIN FETCH s.tour t " +
+           "WHERE b.bookingStatus = :status " +
+           "ORDER BY b.bookingDate DESC")
+    List<Booking> findByBookingStatus(@Param("status") Booking.BookingStatus status);
     
     // Tìm booking theo payment status
-    List<Booking> findByPaymentStatus(Booking.PaymentStatus paymentStatus);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.user u WHERE b.paymentStatus = :paymentStatus")
+    List<Booking> findByPaymentStatus(@Param("paymentStatus") Booking.PaymentStatus paymentStatus);
     
     // Tìm booking theo schedule
     List<Booking> findByScheduleScheduleId(Long scheduleId);
@@ -75,4 +88,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     // Kiểm tra booking code đã tồn tại
     boolean existsByBookingCode(String bookingCode);
+
+    @Query("SELECT DISTINCT b FROM Booking b " +
+           "LEFT JOIN FETCH b.user u " +
+           "LEFT JOIN FETCH b.schedule s " +
+           "LEFT JOIN FETCH s.tour t " +
+           "ORDER BY b.bookingDate DESC")
+    @Override
+    List<Booking> findAll();
+    
+    // Xóa payments liên quan đến booking
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM Payments WHERE booking_id = :bookingId", nativeQuery = true)
+    void deletePaymentsByBookingId(@Param("bookingId") Long bookingId);
 }

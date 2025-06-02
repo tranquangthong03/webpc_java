@@ -254,8 +254,8 @@
                                         <p><strong>Mã tour:</strong> <span th:text="${booking.schedule.tour.tourCode}">TOUR001</span></p>
                                         <p><strong>Điểm đến:</strong> <span th:text="${booking.schedule.tour.destination.destinationName}">Destination</span></p>
                                         <p><strong>Thời gian:</strong> <span th:text="${booking.schedule.tour.durationDays}">3</span> ngày</p>
-                                        <p><strong>Ngày khởi hành:</strong> <span th:text="${#temporals.format(booking.schedule.startDate, 'dd/MM/yyyy')}">15/01/2024</span></p>
-                                        <p><strong>Ngày kết thúc:</strong> <span th:text="${#temporals.format(booking.schedule.endDate, 'dd/MM/yyyy')}">17/01/2024</span></p>
+                                        <p><strong>Ngày khởi hành:</strong> <span th:text="${booking.schedule != null && booking.schedule.departureDate != null ? #temporals.format(booking.schedule.departureDate, 'dd/MM/yyyy') : ''}">15/01/2024</span></p>
+                                        <p><strong>Ngày kết thúc:</strong> <span th:text="${booking.schedule != null && booking.schedule.returnDate != null ? #temporals.format(booking.schedule.returnDate, 'dd/MM/yyyy') : ''}">17/01/2024</span></p>
                                         <p><strong>Giá tour:</strong> <span th:text="${#numbers.formatCurrency(booking.schedule.price)}">1,000,000 VNĐ</span>/người</p>
                                     </div>
                                     <div class="col-md-4">

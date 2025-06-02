@@ -281,11 +281,11 @@
                                                                 <div class="row">
                                                                     <div class="col-md-6">
                                                                         <p><strong>Khách hàng:</strong> <span th:text="${payment.booking.user.fullName}">Customer Name</span></p>
-                                                                        <p><strong>Tour:</strong> <span th:text="${payment.booking.schedule.tour.tourName}">Tour Name</span></p>
+                                                                        <p class="mb-0"><strong>Tour:</strong> <span th:text="${payment.booking?.schedule?.tour?.tourName}">Tour Name</span></p>
+                                                                        <p class="mb-0"><strong>Khởi hành:</strong> <span th:text="${payment.booking?.schedule?.departureDate != null ? #temporals.format(payment.booking.schedule.departureDate, 'dd/MM/yyyy')}">15/01/2024</span></p>
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <p><strong>Tổng tiền booking:</strong> <span th:text="${#numbers.formatCurrency(payment.booking.finalAmount)}">2,000,000 VNĐ</span></p>
-                                                                        <p><strong>Ngày khởi hành:</strong> <span th:text="${#temporals.format(payment.booking.schedule.startDate, 'dd/MM/yyyy')}">15/01/2024</span></p>
                                                                     </div>
                                                                 </div>
                                                             </div>

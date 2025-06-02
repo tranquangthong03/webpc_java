@@ -19,7 +19,9 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     Optional<Tour> findByTourCode(String tourCode);
     
     // Tìm tour active
-    List<Tour> findByStatus(Tour.Status status);    // Tìm tour featured
+    List<Tour> findByStatus(Tour.Status status);
+    
+    // Tìm tour featured
     List<Tour> findByFeaturedTrueAndStatus(Tour.Status status);
     
     // Tìm tour featured với phân trang

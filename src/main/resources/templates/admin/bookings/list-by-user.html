@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý đặt tour theo người dùng - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block bg-primary sidebar collapse" style="min-height: 100vh;">
+                <div class="position-sticky pt-3">
+                    <div class="text-white p-3">
+                        <h5><i class="fas fa-cogs"></i> Admin Panel</h5>
+                        <p>Travel Web Management</p>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/admin/dashboard">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/admin/users">
+                                <i class="fas fa-users"></i> Quản lý người dùng
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/admin/tours">
+                                <i class="fas fa-map-marked-alt"></i> Quản lý Tours
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/admin/categories">
+                                <i class="fas fa-tags"></i> Danh mục
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/admin/destinations">
+                                <i class="fas fa-map-marker-alt"></i> Điểm đến
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white active" href="/admin/bookings">
+                                <i class="fas fa-calendar-check"></i> Đặt tour
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/admin/payments">
+                                <i class="fas fa-credit-card"></i> Thanh toán
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/admin/statistics">
+                                <i class="fas fa-chart-bar"></i> Thống kê
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/">
+                                <i class="fas fa-home"></i> Về trang chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <form th:action="@{/auth/logout}" method="post">
+                                <button type="submit" class="nav-link text-white border-0 bg-transparent">
+                                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="fas fa-calendar-check"></i> Quản lý Đặt tour</h1>
+                </div>
+
+                <div class="mb-4">
+                    <a href="/admin/bookings" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-list"></i> Danh sách Booking
+                    </a>
+                    <a href="/admin/bookings/by-user" class="btn btn-primary me-2">
+                        <i class="fas fa-users"></i> Booking theo Người dùng
+                    </a>
+                </div>
+
+                <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                
+                <div class="accordion" id="userBookingsAccordion">
+                    <div th:each="userBooking, iterStat : ${userBookings}" class="accordion-item">
+                        <h2 class="accordion-header" th:id="'heading' + ${iterStat.index}">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                    th:data-bs-target="'#collapse' + ${iterStat.index}" 
+                                    aria-expanded="true" th:aria-controls="'collapse' + ${iterStat.index}">
+                                <span th:text="${userBooking[0].fullName + ' (' + userBooking[0].email + ')'}"></span>
+                                <span class="badge bg-primary ms-2" th:text="${#lists.size(userBooking[1]) + ' bookings'}"></span>
+                            </button>
+                        </h2>
+                        <div th:id="'collapse' + ${iterStat.index}" class="accordion-collapse collapse" 
+                             th:aria-labelledby="'heading' + ${iterStat.index}" data-bs-parent="#userBookingsAccordion">
+                            <div class="accordion-body">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã booking</th>
+                                            <th>Tour</th>
+                                            <th>Ngày đặt</th>
+                                            <th>Trạng thái</th>
+                                            <th>Thanh toán</th>
+                                            <th>Số người</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="booking : ${userBooking[1]}">
+                                            <td th:text="${booking.bookingCode}"></td>
+                                            <td th:text="${booking.schedule.tour.tourName}"></td>
+                                            <td th:text="${#temporals.format(booking.bookingDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                            <td>
+                                                <span th:class="${'badge ' + 
+                                                    (booking.bookingStatus == T(com.example.travelweb.entity.Booking.BookingStatus).PENDING ? 'bg-warning' : 
+                                                    (booking.bookingStatus == T(com.example.travelweb.entity.Booking.BookingStatus).CONFIRMED ? 'bg-success' : 
+                                                    (booking.bookingStatus == T(com.example.travelweb.entity.Booking.BookingStatus).COMPLETED ? 'bg-info' : 'bg-danger')))}">
+                                                    <span th:text="${booking.bookingStatus}"></span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span th:class="${'badge ' + 
+                                                    (booking.paymentStatus == T(com.example.travelweb.entity.Booking.PaymentStatus).PAID ? 'bg-success' : 
+                                                    (booking.paymentStatus == T(com.example.travelweb.entity.Booking.PaymentStatus).PARTIALLY_PAID ? 'bg-warning' : 'bg-danger'))}">
+                                                    <span th:text="${booking.paymentStatus}"></span>
+                                                </span>
+                                            </td>
+                                            <td th:text="${booking.adultCount + ' người lớn, ' + booking.childCount + ' trẻ em'}"></td>
+                                            <td th:text="${#numbers.formatCurrency(booking.finalAmount)}"></td>
+                                            <td>
+                                                <a th:href="@{'/admin/bookings/' + ${booking.bookingId}}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button th:if="${booking.bookingStatus == T(com.example.travelweb.entity.Booking.BookingStatus).PENDING}"
+                                                        class="btn btn-sm btn-success confirm-booking-btn"
+                                                        th:data-id="${booking.bookingId}">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button th:if="${booking.bookingStatus != T(com.example.travelweb.entity.Booking.BookingStatus).CANCELLED && booking.bookingStatus != T(com.example.travelweb.entity.Booking.BookingStatus).COMPLETED}"
+                                                        class="btn btn-sm btn-danger cancel-booking-btn"
+                                                        th:data-id="${booking.bookingId}">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${userBookings == null || #lists.isEmpty(userBookings)}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Không có booking nào.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel">Xác nhận booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn xác nhận booking này?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-success" id="confirmBookingBtn">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Modal -->
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelModalLabel">Hủy booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn hủy booking này?</p>
+                    <div class="mb-3">
+                        <label for="cancelReason" class="form-label">Lý do hủy</label>
+                        <textarea class="form-control" id="cancelReason" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="cancelBookingBtn">Hủy booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Confirm booking
+        let bookingIdToConfirm;
+        $('.confirm-booking-btn').click(function() {
+            bookingIdToConfirm = $(this).data('id');
+            $('#confirmModal').modal('show');
+        });
+        
+        $('#confirmBookingBtn').click(function() {
+            $.post('/admin/bookings/' + bookingIdToConfirm + '/confirm', function(response) {
+                if (response === 'success') {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + response);
+                }
+            });
+        });
+        
+        // Cancel booking
+        let bookingIdToCancel;
+        $('.cancel-booking-btn').click(function() {
+            bookingIdToCancel = $(this).data('id');
+            $('#cancelModal').modal('show');
+        });
+        
+        $('#cancelBookingBtn').click(function() {
+            const reason = $('#cancelReason').val();
+            if (!reason) {
+                alert('Vui lòng nhập lý do hủy booking.');
+                return;
+            }
+            
+            $.post('/admin/bookings/' + bookingIdToCancel + '/cancel', {reason: reason}, function(response) {
+                if (response === 'success') {
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + response);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

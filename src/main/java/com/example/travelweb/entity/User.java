@@ -43,12 +43,12 @@ public class User {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
     
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", length = 10)
     private Gender gender;
-    
-    @Column(name = "avatar_url")
-    private String avatarUrl;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)

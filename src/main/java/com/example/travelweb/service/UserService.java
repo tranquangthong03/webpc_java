@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -170,11 +171,48 @@ public class UserService {
     }
     
     // Xóa user
+    @Transactional
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy user với ID: " + id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với ID: " + id));
+        
+        try {
+            // Attempt to delete user
+            userRepository.delete(user);
+            userRepository.flush(); // Force the delete to happen immediately
+        } catch (Exception e) {
+            // If we get here, there was a constraint violation or other issue
+            // We'll handle the soft delete separately to avoid the deleted entity error
+            throw new RuntimeException("SOFT_DELETE_REQUIRED");
         }
-        userRepository.deleteById(id);
+    }
+    
+    // Method to handle soft delete when hard delete fails
+    @Transactional
+    public void handleDeleteWithConstraints(Long id) {
+        // Soft delete the user
+        softDeleteUserById(id);
+        
+        // Return informative message
+        throw new RuntimeException("Không thể xóa người dùng vì có dữ liệu liên quan (booking, review, v.v.). " +
+                "Người dùng đã được đánh dấu là không hoạt động thay vì xóa.");
+    }
+    
+    // Soft delete user (mark as inactive instead of deleting)
+    public void softDeleteUserById(Long userId) {
+        // Get a fresh instance of the user
+        User freshUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với ID: " + userId));
+        
+        // Change status to inactive
+        freshUser.setStatus(User.Status.INACTIVE);
+        
+        // Append suffix to prevent future duplicates if someone tries to register with same username/email
+        String deletedSuffix = "_DELETED_" + userId;
+        freshUser.setUsername(freshUser.getUsername() + deletedSuffix);
+        freshUser.setEmail(freshUser.getEmail() + deletedSuffix);
+        
+        userRepository.saveAndFlush(freshUser);
     }
     
     // Lấy users theo role

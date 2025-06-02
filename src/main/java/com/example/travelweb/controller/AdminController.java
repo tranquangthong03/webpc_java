@@ -163,7 +163,21 @@ public class AdminController {
             userService.deleteUser(id);
             redirectAttributes.addFlashAttribute("success", "Đã xóa người dùng thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+            if (e.getMessage().equals("SOFT_DELETE_REQUIRED")) {
+                // This is our special signal that we need to do a soft delete
+                try {
+                    userService.handleDeleteWithConstraints(id);
+                } catch (Exception softDeleteException) {
+                    // Show the user-friendly message from the soft delete operation
+                    redirectAttributes.addFlashAttribute("warning", softDeleteException.getMessage());
+                }
+            } else if (e.getMessage().contains("đánh dấu là không hoạt động")) {
+                // For backward compatibility
+                redirectAttributes.addFlashAttribute("warning", e.getMessage());
+            } else {
+                // Other errors
+                redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+            }
         }
         return "redirect:/admin/users";
     }
@@ -366,22 +380,41 @@ public class AdminController {
                               @RequestParam(defaultValue = "0") int page,
                               @RequestParam(defaultValue = "10") int size,
                               @RequestParam(required = false) String status) {
-        
-        Pageable pageable = PageRequest.of(page, size);
-        List<Booking> bookings;
-        
-        if (status != null && !status.isEmpty()) {
-            Booking.BookingStatus bookingStatus = Booking.BookingStatus.valueOf(status.toUpperCase());
-            bookings = bookingService.getBookingsByStatus(bookingStatus);
-        } else {
-            bookings = bookingService.getAllBookings();
+        try {
+            // Create pageable object
+            Pageable pageable = PageRequest.of(page, size);
+            List<Booking> bookings;
+            
+            if (status != null && !status.isEmpty()) {
+                try {
+                    Booking.BookingStatus bookingStatus = Booking.BookingStatus.valueOf(status);
+                    bookings = bookingService.getBookingsByStatus(bookingStatus);
+                } catch (IllegalArgumentException e) {
+                    bookings = bookingService.getAllBookings();
+                }
+            } else {
+                bookings = bookingService.getAllBookings();
+            }
+            
+            // Add attributes to model
+            model.addAttribute("bookings", bookings);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("selectedStatus", status);
+            model.addAttribute("statuses", Booking.BookingStatus.values());
+            
+            return "admin/bookings/list";
+        } catch (Exception e) {
+            model.addAttribute("error", "Có lỗi xảy ra khi tải danh sách booking: " + e.getMessage());
+            return "admin/bookings/list";
         }
-        
-        model.addAttribute("bookings", bookings);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("selectedStatus", status);
-        
-        return "admin/bookings/list";
+    }
+    
+    // Hiển thị danh sách booking theo user
+    @GetMapping("/bookings/by-user")
+    public String listBookingsByUser(Model model) {
+        model.addAttribute("userBookings", bookingService.getBookingsByUserForAdmin());
+        return "admin/bookings/list-by-user";
     }
     
     @GetMapping("/bookings/{id}")
@@ -416,6 +449,33 @@ public class AdminController {
             bookingService.cancelBooking(id, reason);
             return "success";
         } catch (Exception e) {
+            return "error: " + e.getMessage();
+        }
+    }
+    
+    @PostMapping("/bookings/{id}/delete")
+    @ResponseBody
+    @PreAuthorize("hasRole('ADMIN')")
+    public String deleteBooking(@PathVariable("id") Long id) {
+        try {
+            logger.info("Attempting to delete booking with ID: {}", id);
+            
+            Booking booking = bookingService.getBookingById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+            
+            logger.info("Found booking with status: {}", booking.getBookingStatus());
+            
+            // Chỉ cho phép xóa booking đã hủy
+            if (booking.getBookingStatus() != Booking.BookingStatus.CANCELLED) {
+                logger.warn("Cannot delete booking with status {}: not CANCELLED", booking.getBookingStatus());
+                return "error: Chỉ có thể xóa booking đã hủy";
+            }
+            
+            bookingService.deleteBooking(id);
+            logger.info("Successfully deleted booking with ID: {}", id);
+            return "success";
+        } catch (Exception e) {
+            logger.error("Error deleting booking with ID: {}", id, e);
             return "error: " + e.getMessage();
         }
     }
