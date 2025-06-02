@@ -4,6 +4,7 @@ import com.example.travelweb.entity.TourSchedule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -133,4 +134,9 @@ public interface TourScheduleRepository extends JpaRepository<TourSchedule, Long
     // Tìm schedules theo duration (thông qua tour)
     @Query("SELECT s FROM TourSchedule s WHERE s.tour.durationDays = :duration ORDER BY s.departureDate ASC")
     List<TourSchedule> findByTourDuration(@Param("duration") Integer duration);
+    
+    // Xóa semua schedule berdasarkan tour ID
+    @Modifying
+    @Query(value = "DELETE FROM TourSchedules WHERE tour_id = :tourId", nativeQuery = true)
+    void deleteAllByTourId(@Param("tourId") Long tourId);
 }

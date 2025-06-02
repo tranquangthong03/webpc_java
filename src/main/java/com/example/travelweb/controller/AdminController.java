@@ -216,10 +216,22 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public String saveTour(@ModelAttribute Tour tour, RedirectAttributes redirectAttributes) {
         try {
+            // Lấy thông tin người dùng hiện tại
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication.getName();
+            User currentUser = userService.getUserByUsername(currentUsername)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người dùng hiện tại"));
+            
             if (tour.getTourId() == null) {
+                // Đặt người tạo cho tour mới
+                tour.setCreatedBy(currentUser);
                 tourService.createTour(tour);
                 redirectAttributes.addFlashAttribute("success", "Đã tạo tour mới thành công!");
             } else {
+                // Giữ nguyên người tạo cho tour đã có
+                Tour existingTour = tourService.getTourById(tour.getTourId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với ID: " + tour.getTourId()));
+                tour.setCreatedBy(existingTour.getCreatedBy());
                 tourService.updateTour(tour.getTourId(), tour);
                 redirectAttributes.addFlashAttribute("success", "Đã cập nhật tour thành công!");
             }

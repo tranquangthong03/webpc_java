@@ -4,23 +4,32 @@ import com.example.travelweb.entity.Tour;
 import com.example.travelweb.entity.Category;
 import com.example.travelweb.entity.Destination;
 import com.example.travelweb.entity.User;
+import com.example.travelweb.entity.TourSchedule;
+import com.example.travelweb.entity.TourItinerary;
 import com.example.travelweb.repository.TourRepository;
 import com.example.travelweb.repository.CategoryRepository;
 import com.example.travelweb.repository.DestinationRepository;
+import com.example.travelweb.repository.TourScheduleRepository;
+import com.example.travelweb.repository.TourItineraryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 @Service
 @Transactional
 public class TourService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TourService.class);
     
     @Autowired
     private TourRepository tourRepository;
@@ -30,6 +39,12 @@ public class TourService {
     
     @Autowired
     private DestinationRepository destinationRepository;
+    
+    @Autowired
+    private TourScheduleRepository tourScheduleRepository;
+    
+    @Autowired
+    private TourItineraryRepository tourItineraryRepository;
     
     // Lấy tất cả tours
     public List<Tour> getAllTours() {
@@ -124,23 +139,102 @@ public class TourService {
         return tourRepository.save(tour);
     }
     
-    // Xóa tour
-    public void deleteTour(Long id) {
-        Tour tour = tourRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với ID: " + id));
-        
-        // Kiểm tra xem tour có booking nào không
-        if (!tour.getSchedules().isEmpty()) {
-            // Kiểm tra xem có booking nào đang active không
-            boolean hasActiveBookings = tour.getSchedules().stream()
-                    .anyMatch(schedule -> !schedule.getBookings().isEmpty());
+    // Xóa tour schedules
+    private void deleteTourSchedules(Tour tour) {
+        logger.debug("Menghapus tour schedules untuk tour ID: {}", tour.getTourId());
+        if (tour.getSchedules() != null && !tour.getSchedules().isEmpty()) {
+            // Kiểm tra từng schedule và xóa nếu không có bookings
+            List<TourSchedule> schedulesToRemove = new ArrayList<>();
             
-            if (hasActiveBookings) {
+            for (TourSchedule schedule : tour.getSchedules()) {
+                logger.debug("Memeriksa schedule ID: {}", schedule.getScheduleId());
+                // Kiểm tra xem schedule có bookings không
+                if (schedule.getBookings() == null || schedule.getBookings().isEmpty()) {
+                    logger.debug("Schedule ID: {} tidak memiliki booking, menghapus", schedule.getScheduleId());
+                    schedulesToRemove.add(schedule);
+                    tourScheduleRepository.deleteById(schedule.getScheduleId());
+                } else {
+                    logger.warn("Schedule ID: {} memiliki booking, tidak dapat dihapus", schedule.getScheduleId());
+                    throw new RuntimeException("Không thể xóa tour vì lịch trình tour có ID " + 
+                        schedule.getScheduleId() + " đã có khách đặt");
+                }
+            }
+            
+            // Xóa schedules khỏi danh sách của tour
+            tour.getSchedules().removeAll(schedulesToRemove);
+            logger.debug("Đã xóa {} schedules", schedulesToRemove.size());
+        } else {
+            logger.debug("Tour không có schedules, tidak perlu menghapus");
+        }
+    }
+
+    // Xóa tour
+    @Transactional
+    public void deleteTour(Long id) {
+        logger.info("Xóa tour với ID: {}", id);
+        Tour tour = tourRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Tour với ID: {} không tìm thấy", id);
+                    return new RuntimeException("Không tìm thấy tour với ID: " + id);
+                });
+        
+        try {
+            // Kiểm tra xem tour có booking nào không
+            boolean hasBookings = false;
+            if (tour.getSchedules() != null) {
+                hasBookings = tour.getSchedules().stream()
+                    .anyMatch(schedule -> schedule.getBookings() != null && !schedule.getBookings().isEmpty());
+            }
+                
+            if (hasBookings) {
+                logger.error("Tour ID: {} có booking, không thể xóa", id);
                 throw new RuntimeException("Không thể xóa tour vì đã có khách đặt");
             }
+            
+            try {
+                // Xóa tour schedules trước - Cách 1 (Native SQL)
+                logger.debug("Xóa tour schedules cho tour ID: {} (Native SQL)", id);
+                tourScheduleRepository.deleteAllByTourId(id);
+                
+                // Xóa tour itineraries - Cách 1 (Native SQL)
+                logger.debug("Xóa tour itineraries cho tour ID: {} (Native SQL)", id);
+                tourItineraryRepository.deleteAllByTourId(id);
+                
+            } catch (Exception e) {
+                logger.error("Lỗi khi xóa schedules/itineraries với Native SQL: {}", e.getMessage());
+                logger.debug("Chuyển sang phương thức xóa thủ công...");
+                
+                // Xóa tour schedules - Cách 2 (JPA)
+                if (tour.getSchedules() != null) {
+                    for (TourSchedule schedule : new ArrayList<>(tour.getSchedules())) {
+                        logger.debug("Xóa schedule ID: {}", schedule.getScheduleId());
+                        tour.getSchedules().remove(schedule);
+                        tourScheduleRepository.delete(schedule);
+                    }
+                }
+                
+                // Xóa tour itineraries - Cách 2 (JPA)
+                if (tour.getItineraries() != null) {
+                    for (TourItinerary itinerary : new ArrayList<>(tour.getItineraries())) {
+                        logger.debug("Xóa itinerary ID: {}", itinerary.getItineraryId());
+                        tour.getItineraries().remove(itinerary);
+                        tourItineraryRepository.delete(itinerary);
+                    }
+                }
+            }
+            
+            // Flush để đảm bảo các thay đổi được commit vào DB
+            tourRepository.flush();
+            
+            // Xóa tour
+            logger.debug("Xóa tour ID: {}", id);
+            tourRepository.deleteById(id);
+            logger.info("Tour ID: {} đã xóa thành công", id);
+            
+        } catch (Exception e) {
+            logger.error("Lỗi khi xóa tour ID: {}: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi xóa tour: " + e.getMessage(), e);
         }
-        
-        tourRepository.deleteById(id);
     }
       // Lấy tours nổi bật
     public List<Tour> getFeaturedTours() {

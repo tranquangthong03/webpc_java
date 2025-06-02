@@ -88,7 +88,7 @@ public class Tour {
     private LocalDateTime updatedAt;
     
     // Quan hệ One-to-Many
-    @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<TourSchedule> schedules = new ArrayList<>();
     
     // Tạm thời comment lại phần này để tránh lỗi với bảng tour_images không tồn tại
@@ -97,7 +97,7 @@ public class Tour {
     private List<TourImage> images = new ArrayList<>();
     */
     
-    @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<TourItinerary> itineraries = new ArrayList<>();
     
     // Enums

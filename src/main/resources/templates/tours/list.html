@@ -212,7 +212,7 @@
                     <div class="col-md-6 col-xl-4 mb-4" th:each="tour, iterStat : ${tours.content}">
                         <div class="card h-100 shadow-sm tour-card">
                             <div class="position-relative">
-                                <img th:src="@{/images/tours/tour-00} + ${tour.tourId <= 6 ? tour.tourId : (tour.tourId % 6 == 0 ? 6 : tour.tourId % 6)} + '.jpg'" 
+                                <img th:src="${#strings.startsWith(tour.mainImageUrl, 'http') ? tour.mainImageUrl : '/images/tours/tour-00' + (iterStat.count > 6 ? 1 : iterStat.count) + '.jpg'}"
                                      class="card-img-top" alt="Tour Image" style="height: 200px; object-fit: cover;">
                                 <div class="position-absolute top-0 end-0 m-2">
                                     <span class="badge bg-success" th:if="${tour.featured}">Nổi bật</span>

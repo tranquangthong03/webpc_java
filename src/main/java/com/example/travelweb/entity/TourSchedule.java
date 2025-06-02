@@ -58,9 +58,6 @@ public class TourSchedule {
     @Column(name = "meeting_point", length = 500)
     private String meetingPoint;
     
-    @Column(name = "notes", length = 1000)
-    private String notes;
-    
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -186,14 +183,6 @@ public class TourSchedule {
     
     public void setMeetingPoint(String meetingPoint) {
         this.meetingPoint = meetingPoint;
-    }
-    
-    public String getNotes() {
-        return notes;
-    }
-    
-    public void setNotes(String notes) {
-        this.notes = notes;
     }
     
     public LocalDateTime getCreatedAt() {
