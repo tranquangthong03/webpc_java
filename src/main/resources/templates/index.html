@@ -518,9 +518,9 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-4 mb-4" th:each="tour : ${featuredTours}">
+                <div class="col-md-4 mb-4" th:each="tour, iterStat : ${featuredTours}">
                     <div class="card tour-card h-100">
-                        <img th:src="${tour.mainImageUrl ?: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=250&fit=crop'}" 
+                        <img th:src="@{/images/tours/tour-00} + ${iterStat.count} + '.jpg'" 
                              class="card-img-top" alt="Tour Image" style="height: 250px; object-fit: cover;">
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title fw-bold" th:text="${tour.tourName}">Tour Name</h5>
@@ -560,13 +560,21 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-3 col-sm-6 mb-4" th:each="category : ${categories}">
+                <div class="col-md-3 col-sm-6 mb-4" th:each="category, iterStat : ${categories}">
                     <div class="card category-card text-center h-100">
                         <div class="card-body">
                             <div class="category-icon">
-                                <i class="fas fa-mountain" th:if="${category.iconUrl == null}"></i>
-                                <img th:src="${category.iconUrl}" th:if="${category.iconUrl != null}" 
-                                     style="width: 40px; height: 40px;" alt="Category Icon">
+                                <i th:class="${
+                                    #strings.containsIgnoreCase(category.categoryName, 'biển') ? 'fas fa-water' : 
+                                    #strings.containsIgnoreCase(category.categoryName, 'núi') ? 'fas fa-mountain' :
+                                    #strings.containsIgnoreCase(category.categoryName, 'văn hóa') ? 'fas fa-landmark' :
+                                    #strings.containsIgnoreCase(category.categoryName, 'ẩm thực') ? 'fas fa-utensils' :
+                                    #strings.containsIgnoreCase(category.categoryName, 'nghỉ dưỡng') ? 'fas fa-spa' :
+                                    #strings.containsIgnoreCase(category.categoryName, 'resort') ? 'fas fa-hotel' :
+                                    #strings.containsIgnoreCase(category.categoryName, 'lịch sử') ? 'fas fa-monument' :
+                                    #strings.containsIgnoreCase(category.categoryName, 'thể thao') ? 'fas fa-hiking' :
+                                    'fas fa-globe-asia'
+                                }"></i>
                             </div>
                             <h5 class="card-title fw-bold" th:text="${category.categoryName}">Category</h5>
                             <p class="card-text text-muted" th:text="${category.description}">Description</p>
@@ -588,9 +596,9 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-3 col-sm-6 mb-4" th:each="tour : ${latestTours}">
+                <div class="col-md-3 col-sm-6 mb-4" th:each="tour, iterStat : ${latestTours}">
                     <div class="card tour-card h-100">
-                        <img th:src="${tour.mainImageUrl ?: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&h=200&fit=crop'}" 
+                        <img th:src="@{/images/tours/tour-00} + ${iterStat.count} + '.jpg'" 
                              class="card-img-top" alt="Tour Image" style="height: 200px; object-fit: cover;">
                         <div class="card-body d-flex flex-column">
                             <h6 class="card-title fw-bold" th:text="${tour.tourName}">Tour Name</h6>

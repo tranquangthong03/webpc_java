@@ -27,6 +27,7 @@ public class HomeController {
         
         // Lấy dữ liệu cho trang chủ
         try {
+            // Lấy dữ liệu và truyền trực tiếp vào model không cần xử lý ảnh
             model.addAttribute("featuredTours", tourService.getTopFeaturedTours(6));
             model.addAttribute("latestTours", tourService.getLatestTours(8));
             model.addAttribute("categories", categoryService.getCategoriesWithTours());
