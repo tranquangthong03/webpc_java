@@ -131,7 +131,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2>
                             <i class="fas fa-user-edit me-2"></i>
-                            <span th:text="${user.userId != null ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}">Form người dùng</span>
+                            <span th:if="${editMode == 'role-only'}">Chỉnh sửa vai trò người dùng</span>
+                            <span th:unless="${editMode == 'role-only'}" th:text="${user.userId != null ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}">Form người dùng</span>
                         </h2>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
@@ -159,6 +160,7 @@
                     <div class="form-card">
                         <form th:action="@{/admin/users/save}" method="post" th:object="${user}">
                             <input type="hidden" th:field="*{userId}">
+                            <input type="hidden" name="roleOnlyEdit" th:value="${editMode == 'role-only'}" />
                             
                             <!-- Thông tin đăng nhập -->
                             <div class="form-section">
@@ -173,7 +175,7 @@
                                             Tên đăng nhập <span class="required">*</span>
                                         </label>
                                         <input type="text" class="form-control" id="username" th:field="*{username}" 
-                                               required th:readonly="${user.userId != null}">
+                                               required th:readonly="${user.userId != null || editMode == 'role-only'}">
                                         <div class="form-text">Tên đăng nhập không thể thay đổi sau khi tạo</div>
                                     </div>
                                     
@@ -181,7 +183,8 @@
                                         <label for="email" class="form-label">
                                             Email <span class="required">*</span>
                                         </label>
-                                        <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                        <input type="email" class="form-control" id="email" th:field="*{email}" 
+                                               required th:readonly="${editMode == 'role-only'}">
                                     </div>
                                 </div>
                                 
@@ -217,24 +220,28 @@
                                         <label for="fullName" class="form-label">
                                             Họ và tên <span class="required">*</span>
                                         </label>
-                                        <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
+                                        <input type="text" class="form-control" id="fullName" th:field="*{fullName}" 
+                                               required th:readonly="${editMode == 'role-only'}">
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
                                         <label for="phone" class="form-label">Số điện thoại</label>
-                                        <input type="tel" class="form-control" id="phone" th:field="*{phone}">
+                                        <input type="tel" class="form-control" id="phone" th:field="*{phone}" 
+                                               th:readonly="${editMode == 'role-only'}">
                                     </div>
                                 </div>
                                 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="dateOfBirth" class="form-label">Ngày sinh</label>
-                                        <input type="date" class="form-control" id="dateOfBirth" th:field="*{dateOfBirth}">
+                                        <input type="date" class="form-control" id="dateOfBirth" th:field="*{dateOfBirth}" 
+                                               th:readonly="${editMode == 'role-only'}">
                                     </div>
                                     
                                     <div class="col-md-6 mb-3">
                                         <label for="gender" class="form-label">Giới tính</label>
-                                        <select class="form-select" id="gender" th:field="*{gender}">
+                                        <select class="form-select" id="gender" th:field="*{gender}" 
+                                                th:disabled="${editMode == 'role-only'}">
                                             <option value="">Chọn giới tính</option>
                                             <option value="Male">Nam</option>
                                             <option value="Female">Nữ</option>
@@ -245,7 +252,8 @@
                                 
                                 <div class="mb-3">
                                     <label for="address" class="form-label">Địa chỉ</label>
-                                    <textarea class="form-control" id="address" th:field="*{address}" rows="3"></textarea>
+                                    <textarea class="form-control" id="address" th:field="*{address}" rows="3" 
+                                              th:readonly="${editMode == 'role-only'}"></textarea>
                                 </div>
                             </div>
                             
@@ -260,8 +268,10 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="role" class="form-label">
                                             Vai trò <span class="required">*</span>
+                                            <span th:if="${editMode == 'role-only'}" class="badge bg-success">Editable</span>
                                         </label>
-                                        <select class="form-select" id="role" th:field="*{role}" required>
+                                        <select class="form-select" id="role" th:field="*{role}" required
+                                                th:classappend="${editMode == 'role-only' ? 'border-success' : ''}">
                                             <option value="">Chọn vai trò</option>
                                             <option value="ADMIN">Quản trị viên</option>
                                             <option value="STAFF">Nhân viên</option>
@@ -280,7 +290,8 @@
                                         <label for="status" class="form-label">
                                             Trạng thái <span class="required">*</span>
                                         </label>
-                                        <select class="form-select" id="status" th:field="*{status}" required>
+                                        <select class="form-select" id="status" th:field="*{status}" required 
+                                                th:disabled="${editMode == 'role-only'}">
                                             <option value="">Chọn trạng thái</option>
                                             <option value="ACTIVE">Hoạt động</option>
                                             <option value="INACTIVE">Không hoạt động</option>

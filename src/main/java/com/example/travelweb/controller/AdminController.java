@@ -120,12 +120,66 @@ public class AdminController {
         return "admin/users/list";
     }
 
+    // Create user - need to be defined before /users/{id} to avoid conflict
+    @GetMapping("/users/new")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String newUser(Model model) {
+        model.addAttribute("user", new User());
+        model.addAttribute("roles", User.Role.values());
+        model.addAttribute("statuses", User.Status.values());
+        model.addAttribute("genders", User.Gender.values());
+        return "admin/users/form";
+    }
+
     @GetMapping("/users/{id}")
     public String viewUser(@PathVariable Long id, Model model) {
         User user = userService.getUserById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
         model.addAttribute("user", user);
         return "admin/users/detail";
+    }
+
+    @GetMapping("/users/{id}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String editUser(@PathVariable Long id, Model model) {
+        User user = userService.getUserById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+        model.addAttribute("user", user);
+        model.addAttribute("roles", User.Role.values());
+        model.addAttribute("statuses", User.Status.values());
+        model.addAttribute("genders", User.Gender.values());
+        model.addAttribute("editMode", "role-only"); // Special flag for role-only editing
+        return "admin/users/form";
+    }
+
+    @PostMapping("/users/save")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String saveUser(@ModelAttribute User user, 
+                          @RequestParam(required = false) String password,
+                          @RequestParam(required = false, defaultValue = "false") boolean roleOnlyEdit,
+                          RedirectAttributes redirectAttributes) {
+        try {
+            if (user.getUserId() == null) {
+                // New user - set password
+                if (password == null || password.trim().isEmpty()) {
+                    throw new RuntimeException("Mật khẩu không được để trống");
+                }
+                user.setPasswordHash(password); // Service will encode the password
+                userService.createUser(user);
+                redirectAttributes.addFlashAttribute("success", "Đã tạo người dùng mới thành công!");
+            } else if (roleOnlyEdit) {
+                // Role-only edit - only update the role
+                userService.changeUserRole(user.getUserId(), user.getRole());
+                redirectAttributes.addFlashAttribute("success", "Đã cập nhật vai trò người dùng thành công!");
+            } else {
+                // Full edit - update all user fields
+                userService.updateUser(user.getUserId(), user);
+                redirectAttributes.addFlashAttribute("success", "Đã cập nhật người dùng thành công!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
     }
 
     @PostMapping("/users/{id}/change-role")

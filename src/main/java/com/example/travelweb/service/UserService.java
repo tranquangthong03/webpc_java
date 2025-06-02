@@ -86,6 +86,16 @@ public class UserService {
             throw new RuntimeException("Email đã tồn tại: " + user.getEmail());
         }
         
+        // Mã hóa mật khẩu nếu được thiết lập
+        if (user.getPasswordHash() != null) {
+            user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        }
+        
+        // Thiết lập thời gian tạo
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
+        }
+        
         return userRepository.save(user);
     }
     
