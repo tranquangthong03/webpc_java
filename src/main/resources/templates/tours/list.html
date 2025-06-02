@@ -209,10 +209,10 @@
 
                 <!-- Tours Grid -->
                 <div class="row" th:if="${not tours.empty}">
-                    <div class="col-md-6 col-xl-4 mb-4" th:each="tour : ${tours.content}">
+                    <div class="col-md-6 col-xl-4 mb-4" th:each="tour, iterStat : ${tours.content}">
                         <div class="card h-100 shadow-sm tour-card">
                             <div class="position-relative">
-                                <img th:src="${tour.mainImageUrl ?: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=250&fit=crop'}" 
+                                <img th:src="@{/images/tours/tour-00} + ${tour.tourId <= 6 ? tour.tourId : (tour.tourId % 6 == 0 ? 6 : tour.tourId % 6)} + '.jpg'" 
                                      class="card-img-top" alt="Tour Image" style="height: 200px; object-fit: cover;">
                                 <div class="position-absolute top-0 end-0 m-2">
                                     <span class="badge bg-success" th:if="${tour.featured}">Nổi bật</span>

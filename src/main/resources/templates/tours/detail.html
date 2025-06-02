@@ -32,7 +32,7 @@
             <!-- Tour Images -->
             <div class="col-lg-8 mb-4">
                 <div class="card">
-                    <img th:src="${tour != null && tour.mainImageUrl != null ? tour.mainImageUrl : 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=500&fit=crop'}" 
+                    <img th:src="@{/images/tours/tour-00} + ${tour != null ? (tour.tourId <= 6 ? tour.tourId : (tour.tourId % 6 == 0 ? 6 : tour.tourId % 6)) : 1} + '.jpg'" 
                          class="card-img-top tour-image" alt="Tour Image">
                 </div>
             </div>
